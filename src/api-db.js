@@ -38,8 +38,8 @@ exports.BuildSchema = new Schema({
 
 exports.ApiDb =
 {
-    Item: mongoose.model('ProductModel', exports.ProductSchema),
-    Item: mongoose.model('BuildModel', exports.BuildSchema),
+    Product: mongoose.model('ProductModel', exports.ProductSchema),
+    Build: mongoose.model('BuildModel', exports.BuildSchema),
     Connect: function(db)
     {
         console.log('ApiDb.Connect');

@@ -42,7 +42,7 @@ exports.ApiController =
     {
         console.log('ApiController.ProductsGet');
 
-        var response = JSON.stringify([]);
+        var response = [];
 
         this.SendJson(res, response);
 
@@ -53,9 +53,9 @@ exports.ApiController =
         console.log('ApiController.ProductGet');
 
         var that  = this,
-            name  = req.params.product || req.body.product;
+            product  = req.params.product || req.body.product;
 
-        var response = JSON.stringify({product: product});
+        var response = {product: product};
 
         this.SendJson(res, response);
 
@@ -65,7 +65,7 @@ exports.ApiController =
     {
         console.log('ApiController.BuildsGet');
 
-        var response = JSON.stringify([]);
+        var response = [];
 
         this.SendJson(res, response);
 
@@ -73,12 +73,12 @@ exports.ApiController =
     },
     BuildGet: function(req, res, next)
     {
-        console.log('ApiController.ProductGet');
+        console.log('ApiController.BuildGet');
 
         var that  = this,
-            name  = req.params.build || req.body.build;
+            build  = req.params.build || req.body.build;
 
-        var response = JSON.stringify({build: build});
+        var response = {build: build};
 
         this.SendJson(res, response);
 
@@ -88,13 +88,14 @@ exports.ApiController =
     {
         console.log('ApiController.Default', req.method, req.url);
 
-        this.SendError(res, 'Invalid API: ' + req.method + ' ' + req.url, 501);
+        this.SendError(res,
+	    'Invalid endpoint: ' + req.method + ' ' + req.url, 501);
 
         return this;
     },
-    SendJson: function(res, content)
+    SendJson: function(res, obj)
     {
-        res.contentType('application/json').json(content);
+        res.json(obj);
         return this;
     },
     SendError: function(res, content, code)

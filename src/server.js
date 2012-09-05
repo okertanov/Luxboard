@@ -15,11 +15,6 @@
 // Strict mode by default
 "use strict";
 
-// Pathes
-var ServerRoot  = __dirname,
-    ProjectRoot = path.normalize(ServerRoot + '/../'),
-    WWWRoot     = path.normalize(ProjectRoot + '/wwwroot/');
-
 // System & App modules
 var os      = require('os'),
     fs      = require('fs'),
@@ -27,6 +22,10 @@ var os      = require('os'),
     express = require('express'),
     ApiController = require('./api-controller.js').ApiController;
 
+// Pathes
+var ServerRoot  = __dirname,
+    ProjectRoot = path.normalize(ServerRoot + '/../'),
+    WWWRoot     = path.normalize(ProjectRoot + '/wwwroot/');
 
 // Configuration
 var Port = 8888;
