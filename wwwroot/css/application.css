@@ -1,0 +1,32 @@
+html
+{
+    width: 100% !important;
+    height: 100% !important;
+}
+
+body
+{
+    width: 100% !important;
+    height: 100% !important;
+    background-color: #4F4F3F;
+    background-image: url(../img/textures/low_contrast_linen.png);
+    background-repeat: repeat;
+
+    font-size: 1em;
+    line-height: 1.4;
+    font: 16px/26px Helvetica, Helvetica Neue, Arial;
+}
+
+header h3
+{
+    color: #A0A0A0;
+    font-size: 1.2em;
+    text-shadow: 1px 2px 3px #0A0A0A;
+}
+
+article.issues .counter
+{
+    color: #A0A0A0;
+    font: 16em Helvetica, Helvetica Neue, Arial;
+    text-align: left;
+}

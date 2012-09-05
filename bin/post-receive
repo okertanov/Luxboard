@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd /srv/www/luxboard.lan || exit
+make update
+
