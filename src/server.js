@@ -22,7 +22,7 @@ var os      = require('os'),
     express = require('express');
 
 // Pathes
-var ServerRoot  = __filename,
+var ServerRoot  = __dirname,
     ProjectRoot = path.normalize(ServerRoot + '/../'),
     WWWRoot     = path.normalize(ProjectRoot + '/wwwroot/');
 
@@ -33,6 +33,8 @@ var Port = 8888;
 var app = express();
 
 app.configure(function () {
+  app.use(express.logger());
+  app.use(express.static(WWWRoot));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
@@ -43,13 +45,11 @@ app.listen(Port);
 
 process
     .on('exit', function () {
-        ApiController.Terminate();
     })
     .on('uncaughtException', function (e){
         console.log(e, e.toString());
     })
     .on('SIGINT', function () {
-        ApiController.Terminate();
         process.exit();
     });
 

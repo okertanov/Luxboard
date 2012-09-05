@@ -11,7 +11,7 @@ OUT_FILE := log/output.log
 ERR_FILE := log/error.log
 LOG_FILE := log/run.log
 
-FRV_OPTIONS = --watch --watchDirectory $(SRC_DIR)
+FRV_OPTIONS = --watch --watchDirectory $(SRC_DIR) -e $(ERR_FILE) -o $(OUT_FILE)
 
 all:
 	-@echo "------------------------------------------------"
@@ -37,6 +37,18 @@ update:
 	-@echo "------------------------------------------------"
 	@env -i git pull --ff-only --force origin
 	@env -i git submodule update --init --recursive
+	-@echo "------------------------------------------------"
+
+npm:
+	-@echo "------------------------------------------------"
+	npm install -g   \
+	connect@2.4.5    \
+        express@3.0.0rc4 \
+        underscore@1.3.3 \
+        socket.io@0.9.10 \
+        forever@0.10.0   \
+        mongodb@1.1.6    \
+        mongoose@3.1.1 
 	-@echo "------------------------------------------------"
 
 clean:
