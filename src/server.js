@@ -19,7 +19,9 @@
 var os      = require('os'),
     fs      = require('fs'),
     path    = require('path'),
+    http    = require('http'),
     express = require('express'),
+    app     = express(),
     ApiController = require('./api-controller.js').ApiController;
 
 // Pathes
@@ -31,8 +33,6 @@ var ServerRoot  = __dirname,
 var Port = 8888;
 
 // Express application
-var app = express();
-
 app.configure(function () {
   app.use(express.logger());
   app.use(express.static(WWWRoot));
@@ -46,8 +46,26 @@ app.configure(function () {
 ApiController.Initialize();
 ApiController.Route(app);
 
-// Server
-app.listen(Port);
+// Express Server
+var server = app.listen(Port);
+
+// Socket.io
+var io = require('socket.io').listen(server);
+
+io.on('connection', function (socket)
+{
+    console.log('Socket.io connection.');
+
+    socket.on('message', function (msg)
+    {
+        console.log('Socket.io message received: ', msg);
+        socket.broadcast.emit('message', msg);
+    });
+
+    socket.on('disconnect', function(){
+        console.log('Socket.io disconnect.');
+    });
+});
 
 // Process handlers
 process
