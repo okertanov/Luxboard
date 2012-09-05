@@ -15,16 +15,18 @@
 // Strict mode by default
 "use strict";
 
-// System modules
-var os      = require('os'),
-    fs      = require('fs'),
-    path    = require('path'),
-    express = require('express');
-
 // Pathes
 var ServerRoot  = __dirname,
     ProjectRoot = path.normalize(ServerRoot + '/../'),
     WWWRoot     = path.normalize(ProjectRoot + '/wwwroot/');
+
+// System & App modules
+var os      = require('os'),
+    fs      = require('fs'),
+    path    = require('path'),
+    express = require('express'),
+    ApiController = require('./api-controller.js').ApiController;
+
 
 // Configuration
 var Port = 8888;
@@ -37,19 +39,27 @@ app.configure(function () {
   app.use(express.static(WWWRoot));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
+  app.use(app.router);
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
+
+// Router
+ApiController.Initialize();
+ApiController.Route(app);
 
 // Server
 app.listen(Port);
 
+// Process handlers
 process
     .on('exit', function () {
+        ApiController.Terminate();
     })
     .on('uncaughtException', function (e){
         console.log(e, e.toString());
     })
     .on('SIGINT', function () {
+        ApiController.Terminate();
         process.exit();
     });
 
