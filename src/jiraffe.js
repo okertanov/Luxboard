@@ -26,8 +26,8 @@ exports.Jiraffe = function(link, user, password)
             user: user,
             password: password,
             timeout: 10000,
-            api:  'rest/api/latest/',
-            auth: 'rest/auth/1/'
+            api:  '/rest/api/latest/',
+            auth: '/rest/auth/1/'
         },
         Initialize: function()
         {
@@ -40,7 +40,7 @@ exports.Jiraffe = function(link, user, password)
         DoRequest: function(options, cbCommon, cbLogicOK, cbLogicFail)
         {
             var that = this,
-                data = null;
+                data = {};
 
             console.log('Jiraffe.DoRequest() URI:', options.uri);
 
@@ -53,7 +53,7 @@ exports.Jiraffe = function(link, user, password)
                         cbLogicOK.call(that, error, response, body);
                     }
 
-                    data = JSON.parse(body);
+                    data = body;
                 }
                 else
                 {
@@ -119,7 +119,6 @@ exports.Jiraffe = function(link, user, password)
         GetServerInfo: function(cb)
         {
             var that = this,
-                info = {},
                 uri =
                 [
                     this.ctx.link,
@@ -130,12 +129,8 @@ exports.Jiraffe = function(link, user, password)
                 {
                     timeout: this.ctx.timeout,
                     uri: uri,
-                    method: 'POST',
-                    json: true,
-                    headers:
-                    {
-                        'Cookie': this.ctx.cookies.join(';')
-                    }
+                    method: 'GET',
+                    json: true
                 };
 
             if ( this.IsLoggedin() )
@@ -156,8 +151,6 @@ exports.Jiraffe = function(link, user, password)
         },
         GetUnresolvedIssueCountFor: function(id, cb)
         {
-            var issues = {};
-
             return this;
         }
     };

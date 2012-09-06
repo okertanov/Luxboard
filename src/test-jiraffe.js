@@ -25,7 +25,7 @@ var Jiraffe = require('./jiraffe.js').Jiraffe;
 try
 {
     // Constructor
-    var jiraffe = new Jiraffe('http://jira.lan/', 'user', 'pwddwp');
+    var jiraffe = new Jiraffe('http://jira.lan', 'user', 'pwddwp');
 
     // Initialize()
     jiraffe.Initialize();
@@ -79,6 +79,7 @@ catch(e)
 process.on('uncaughtException', function(e)
 {
     console.log('Jiraffe test uncaught exception:', e);
+    process.exit(-1);
 });
 
 })();
