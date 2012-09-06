@@ -101,7 +101,7 @@ exports.Jiraffe = function(link, user, password)
                 function OK(error, response, body)
                 {
                     that.ctx.logged = true;
-                    console.log('Jiraffe.Login() OK:', body);
+                    console.log('Jiraffe.Login() OK.');
                 },
                 function Failed(error, response, body)
                 {
@@ -138,7 +138,7 @@ exports.Jiraffe = function(link, user, password)
                 this.DoRequest(options, cb,
                     function OK(error, response, body)
                     {
-                        console.log('Jiraffe.GetServerInfo() OK:', body);
+                        console.log('Jiraffe.GetServerInfo() OK.');
                     },
                     function Failed(error, response, body)
                     {
@@ -151,6 +151,37 @@ exports.Jiraffe = function(link, user, password)
         },
         GetUnresolvedIssueCountFor: function(id, cb)
         {
+            var that = this,
+                uri =
+                [
+                    this.ctx.link,
+                    this.ctx.api,
+                    'version',
+                    '/',id,'/',
+                    'unresolvedIssueCount'
+                ].join(''),
+                options =
+                {
+                    timeout: this.ctx.timeout,
+                    uri: uri,
+                    method: 'GET',
+                    json: true
+                };
+
+            if ( this.IsLoggedin() )
+            {
+                this.DoRequest(options, cb,
+                    function OK(error, response, body)
+                    {
+                        console.log('Jiraffe.GetUnresolvedIssueCountFor() OK.');
+                    },
+                    function Failed(error, response, body)
+                    {
+                        console.log('Jiraffe.GetUnresolvedIssueCountFor() Error:', 'Failed.');
+                    }
+                );
+            }
+
             return this;
         }
     };
