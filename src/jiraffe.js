@@ -36,7 +36,7 @@ exports.Jiraffe = function(link, user, password)
         {
             return this;
         },
-        Login: function()
+        Login: function(cb)
         {
             var that = this,
                 uri =
@@ -60,29 +60,34 @@ exports.Jiraffe = function(link, user, password)
             request(options, function(error, response, body)
             {
                 if ( !error )
-		{
-			if ( response.statusCode === 200 )
-			{
-			    if ( response.headers['Set-Cookie'] )
-			    {
-				that.ctx.cookies = response.headers['Set-Cookie'];
-				that.ctx.logged = true;
-				console.log('Jiraffe.Login() OK:', that.ctx.cookies);
-			    }
-			    else
-			    {
-				console.log('Jiraffe.Login() Error:', 'No Set-Cookie header found.');
-			    }
-			}
-			else
-			{
-			    console.log('Jiraffe.Login() Error:', response.statusCode);
-			}
-		}
-		else
-		{
-			console.log('Jiraffe.Login() Error:', error.errno);
-		}
+                {
+                    if ( response.statusCode === 200 )
+                    {
+                        if ( response.headers['Set-Cookie'] )
+                        {
+                            that.ctx.cookies = response.headers['Set-Cookie'];
+                            that.ctx.logged = true;
+                            console.log('Jiraffe.Login() OK:', that.ctx.cookies);
+                        }
+                        else
+                        {
+                            console.log('Jiraffe.Login() Error:', 'No Set-Cookie header found.');
+                        }
+                    }
+                    else
+                    {
+                        console.log('Jiraffe.Login() Error:', response.statusCode);
+                    }
+                }
+                else
+                {
+                    console.log('Jiraffe.Login() Error:', error.errno);
+                }
+
+                if ( typeof cb === 'function' )
+                {
+                    cb.call(this);
+                }
             });
 
             return this;
@@ -91,15 +96,27 @@ exports.Jiraffe = function(link, user, password)
         {
             return this.ctx.logged;
         },
-        GetServerInfo: function()
+        GetServerInfo: function(cb)
         {
             var info = {};
-            return info;
+
+            if ( typeof cb === 'function' )
+            {
+                cb.call(this, info);
+            }
+
+            return this;
         },
-        GetUnresolvedIssueCountFor: function(id)
+        GetUnresolvedIssueCountFor: function(id, cb)
         {
             var issues = {};
-            return issues;
+
+            if ( typeof cb === 'function' )
+            {
+                cb.call(this, issues);
+            }
+
+            return this;
         }
     };
 };

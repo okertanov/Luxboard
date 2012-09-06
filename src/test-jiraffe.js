@@ -26,34 +26,42 @@ try
 {
     var jiraffe = new Jiraffe('http://jira.lan/', 'user', 'pwddwp');
     jiraffe.Initialize();
-    jiraffe.Login();
-    if ( jiraffe.IsLoggedin() )
+    jiraffe.Login(function()
     {
-        var info = jiraffe.GetServerInfo();
-        console.dir(info);
+        if ( jiraffe.IsLoggedin() )
+        {
+            var info = jiraffe.GetServerInfo();
+            console.dir(info);
 
-        var uTrunk = jiraffe.GetUnresolvedIssueCountFor(11101),
-            uStable = jiraffe.GetUnresolvedIssueCountFor(11800);
+            jiraffe.GetUnresolvedIssueCountFor(11101, function(utrunk){
+            });
+            jiraffe.GetUnresolvedIssueCountFor(11800);
 
-        if ( IsObjectEmpty(uTrunk) )
-            throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(trunk)');
+            if ( IsObjectEmpty(uTrunk) )
+                throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(trunk)');
 
-        if ( IsObjectEmpty(uStable) )
-            throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(stable)');
+            if ( IsObjectEmpty(uStable) )
+                throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(stable)');
 
-        console.dir(uTrunk),
-            console.dir(uStable);
-    }
-    else
-    {
-        throw new Error('Jiraffe test error: Unable to login.');
-    }
-    jiraffe.Terminate();
+            console.dir(uTrunk),
+                console.dir(uStable);
+        }
+        else
+        {
+            throw new Error('Jiraffe test error: Unable to login.');
+        }
+        jiraffe.Terminate();
+    });
 }
 catch(e)
 {
     console.log(e);
 }
+
+process.on('uncaughtException', function(e)
+{
+    console.log('uncaughtException:', e);
+});
 
 })();
 

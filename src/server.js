@@ -81,16 +81,16 @@ io.on('connection', function(socket)
 
 // Process handlers
 process
-    .on('exit', function () {
+    .on('exit', function() {
         Cleanup();
     })
-    .on('uncaughtException', function (e){
-        console.log(e, e.toString());
+    .on('uncaughtException', function(e){
+        console.log('uncaughtException:', e);
     })
-    .on('SIGUSR1', function () {
+    .on('SIGUSR1', function() {
         DumpStat();
     })
-    .on('SIGINT', function () {
+    .on('SIGINT', function() {
         Cleanup();
         process.exit();
     });
