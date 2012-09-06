@@ -20,11 +20,11 @@ function IsObjectEmpty(o)
     return Object.keys(o).length === 0;
 }
 
-var Jiraffe = require('jiraffe.js').Jiraffe;
+var Jiraffe = require('./jiraffe.js').Jiraffe;
 
 try
 {
-    jiraffe = new Jiraffe('http://jira.lan/', 'user', 'pwddwp');
+    var jiraffe = new Jiraffe('http://jira.lan/', 'user', 'pwddwp');
     jiraffe.Initialize();
     jiraffe.Login();
     if ( jiraffe.IsLoggedin() )
@@ -36,23 +36,23 @@ try
             uStable = jiraffe.GetUnresolvedIssueCountFor(11800);
 
         if ( IsObjectEmpty(uTrunk) )
-            throw new Exception('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(trunk)');
+            throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(trunk)');
 
         if ( IsObjectEmpty(uStable) )
-            throw new Exception('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(stable)');
+            throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(stable)');
 
         console.dir(uTrunk),
             console.dir(uStable);
     }
     else
     {
-        throw new Exception('Jiraffe test error: Unable to login.');
+        throw new Error('Jiraffe test error: Unable to login.');
     }
     jiraffe.Terminate();
 }
 catch(e)
 {
-    console.log(e, e.toString());
+    console.log(e);
 }
 
 })();

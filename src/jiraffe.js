@@ -59,30 +59,37 @@ exports.Jiraffe = function(link, user, password)
 
             request(options, function(error, response, body)
             {
-                if ( response.statusCode === 200 )
-                {
-                    if ( response.headers['Set-Cookie'] )
-                    {
-                        that.ctx.cookies = response.headers['Set-Cookie'];
-                        that.ctx.logged = true;
-                        console.log('Jiraffe.Login() OK:', that.ctx.cookies);
-                    }
-                    else
-                    {
-                        console.log('Jiraffe.Login() Error:', 'No Set-Cookie header found.');
-                    }
-                }
-                else
-                {
-                    console.log('Jiraffe.Login() Error:', response.statusCode);
-                }
+                if ( !error )
+		{
+			if ( response.statusCode === 200 )
+			{
+			    if ( response.headers['Set-Cookie'] )
+			    {
+				that.ctx.cookies = response.headers['Set-Cookie'];
+				that.ctx.logged = true;
+				console.log('Jiraffe.Login() OK:', that.ctx.cookies);
+			    }
+			    else
+			    {
+				console.log('Jiraffe.Login() Error:', 'No Set-Cookie header found.');
+			    }
+			}
+			else
+			{
+			    console.log('Jiraffe.Login() Error:', response.statusCode);
+			}
+		}
+		else
+		{
+			console.log('Jiraffe.Login() Error:', error.errno);
+		}
             });
 
             return this;
         },
         IsLoggedin: function()
         {
-            return that.ctx.logged;
+            return this.ctx.logged;
         },
         GetServerInfo: function()
         {

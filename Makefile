@@ -48,7 +48,8 @@ npm:
         socket.io@0.9.10 \
         forever@0.10.0   \
         mongodb@1.1.6    \
-        mongoose@3.1.1 
+        mongoose@3.1.1   \
+	request@2.11.1
 	-@echo "------------------------------------------------"
 
 clean:
