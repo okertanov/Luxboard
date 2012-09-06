@@ -52,8 +52,8 @@ exports.ApiController =
     {
         console.log('ApiController.ProductGet');
 
-        var that  = this,
-            product  = req.params.product || req.body.product;
+        var that = this,
+            product = req.params.product || req.body.product;
 
         var response = {product: product};
 
@@ -75,10 +75,24 @@ exports.ApiController =
     {
         console.log('ApiController.BuildGet');
 
-        var that  = this,
-            build  = req.params.build || req.body.build;
+        var that = this,
+            build = req.params.build || req.body.build;
 
         var response = {build: build};
+
+        this.SendJson(res, response);
+
+        return this;
+    },
+    AdminPost: function(req, res, next)
+    {
+        console.log('ApiController.BuildGet');
+
+        var that = this,
+            command = req.params.build || req.body.build,
+            data = req.params.data || req.body.data;
+
+        var response = {};
 
         this.SendJson(res, response);
 
@@ -89,7 +103,7 @@ exports.ApiController =
         console.log('ApiController.Default', req.method, req.url);
 
         this.SendError(res,
-	    'Invalid endpoint: ' + req.method + ' ' + req.url, 501);
+            'Invalid endpoint: ' + req.method + ' ' + req.url, 501);
 
         return this;
     },
@@ -109,15 +123,16 @@ exports.ApiController =
 
         var that = this;
 
-        app.get( '/api/products',           function(req, res, next){ that.ProductsGet.call(that, req, res, next); } );
-        app.get( '/api/products/:product',  function(req, res, next){ that.ProductGet.call(that, req, res, next); } );
-        app.get( '/api/builds',             function(req, res, next){ that.BuildsGet.call(that, req, res, next); } );
-        app.get( '/api/builds/:build',      function(req, res, next){ that.BuildGet.call(that, req, res, next); } );
-        app.all( '/*',                      function(req, res, next){ that.Default.call(that, req, res, next); } );
+        app.get(  '/api/products',           function(req, res, next){ that.ProductsGet.call(that, req, res, next); } );
+        app.get(  '/api/products/:product',  function(req, res, next){ that.ProductGet.call(that, req, res, next); } );
+        app.get(  '/api/builds',             function(req, res, next){ that.BuildsGet.call(that, req, res, next); } );
+        app.get(  '/api/builds/:build',      function(req, res, next){ that.BuildGet.call(that, req, res, next); } );
+        app.post( '/api/admin',              function(req, res, next){ that.AdminPost.call(that, req, res, next); } );
+        app.all(  '/*',                      function(req, res, next){ that.Default.call(that, req, res, next); } );
 
         return this;
     }
 };
 
-})()
+})();
 
