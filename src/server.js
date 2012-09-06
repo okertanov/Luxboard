@@ -48,9 +48,6 @@ app.configure(function () {
 // Router
 ApiController.Initialize().Route(app);
 
-// Express Server
-var server = app.listen(WWWPort);
-
 // BTS polling Task
 var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
     console.log(this.ctx.name);
@@ -60,6 +57,9 @@ var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
 var CisTask = (new Periodic(CisName, CisTimeout, function(){
     console.log(this.ctx.name);
 })).Initialize();
+
+// Express Server
+var server = app.listen(WWWPort);
 
 // Socket.io
 var io = require('socket.io').listen(server);
@@ -109,8 +109,8 @@ function DumpStat()
     var mem = process.memoryUsage(),
         stat = [
         '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-        'Process: ' + process.title + '(' + process.pid + ')' + 'on ' + 'node.js '
-                    + process.version + ' for '
+        'Process: ' + process.title + '(' + process.pid + ')'
+                    + 'on ' + 'node.js ' + process.version + ' for '
                     + process.platform + '/' + process.arch,
         'Current directory: ' + process.cwd(),
         'Uptime:  ' + Math.floor(process.uptime() / 60) + ' min.',
