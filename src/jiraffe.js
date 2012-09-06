@@ -26,8 +26,8 @@ exports.Jiraffe = function(link, user, password)
             user: user,
             password: password,
             timeout: 10000,
-            api:  '/rest/api/latest/',
-            auth: '/rest/auth/1/'
+            api:  'rest/api/latest/',
+            auth: 'rest/auth/1/'
         },
         Initialize: function()
         {
@@ -41,6 +41,9 @@ exports.Jiraffe = function(link, user, password)
         {
             var that = this,
                 data = null;
+
+
+            console.log('Jiraffe.DoRequest() URI:', options.uri);
 
             request(options, function(error, response, body)
             {
@@ -98,16 +101,8 @@ exports.Jiraffe = function(link, user, password)
             this.DoRequest(options, cb,
                 function OK(error, response, body)
                 {
-                    if ( response.headers['Set-Cookie'] )
-                    {
-                        that.ctx.cookies = response.headers['Set-Cookie'];
-                        that.ctx.logged = true;
-                        console.log('Jiraffe.Login() OK:', that.ctx.cookies);
-                    }
-                    else
-                    {
-                        console.log('Jiraffe.Login() Error:', 'No Set-Cookie header found.');
-                    }
+                    that.ctx.logged = true;
+                    console.log('Jiraffe.Login() OK:', body);
                 },
                 function Failed(error, response, body)
                 {
