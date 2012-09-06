@@ -37,6 +37,40 @@ exports.Jiraffe = function(link, user, password)
         {
             return this;
         },
+        DoRequest: function(options, cbCommon, cbLogicOK, cbLogicFail)
+        {
+            var that = this,
+                data = null;
+
+            request(options, function(error, response, body)
+            {
+                if ( !error && response.statusCode === 200 )
+                {
+                    if ( typeof cbLogicOK === 'function' )
+                    {
+                        cbLogicOK.call(that, error, response, body);
+                    }
+
+                    data = JSON.parse(body);
+                }
+                else
+                {
+                    var err = response && response.statusCode ? response.statusCode :
+                                    error && error.errno ? error.errno : 'unknown';
+                    console.log('Jiraffe.DoRequest() Error:', err);
+
+                    if ( typeof cbLogicFail === 'function' )
+                    {
+                        cbLogicFail.call(that, error, response, body);
+                    }
+                }
+
+                if ( typeof cbCommon === 'function' )
+                {
+                    cbCommon.call(that, data);
+                }
+            });
+        },
         Login: function(cb)
         {
             var that = this,
@@ -59,38 +93,28 @@ exports.Jiraffe = function(link, user, password)
                     }
                 };
 
-            request(options, function(error, response, body)
-            {
-                if ( !error )
+            this.ctx.logged = false;
+
+            this.DoRequest(options, cb,
+                function OK(error, response, body)
                 {
-                    if ( response.statusCode === 200 )
+                    if ( response.headers['Set-Cookie'] )
                     {
-                        if ( response.headers['Set-Cookie'] )
-                        {
-                            that.ctx.cookies = response.headers['Set-Cookie'];
-                            that.ctx.logged = true;
-                            console.log('Jiraffe.Login() OK:', that.ctx.cookies);
-                        }
-                        else
-                        {
-                            console.log('Jiraffe.Login() Error:', 'No Set-Cookie header found.');
-                        }
+                        that.ctx.cookies = response.headers['Set-Cookie'];
+                        that.ctx.logged = true;
+                        console.log('Jiraffe.Login() OK:', that.ctx.cookies);
                     }
                     else
                     {
-                        console.log('Jiraffe.Login() Error:', response.statusCode);
+                        console.log('Jiraffe.Login() Error:', 'No Set-Cookie header found.');
                     }
-                }
-                else
+                },
+                function Failed(error, response, body)
                 {
-                    console.log('Jiraffe.Login() Error:', error.errno);
+                    that.ctx.logged = false;
+                    console.log('Jiraffe.Login() Error:', 'Failed.');
                 }
-
-                if ( typeof cb === 'function' )
-                {
-                    cb.call(this);
-                }
-            });
+            );
 
             return this;
         },
@@ -100,11 +124,38 @@ exports.Jiraffe = function(link, user, password)
         },
         GetServerInfo: function(cb)
         {
-            var info = {};
+            var that = this,
+                info = {},
+                uri =
+                [
+                    this.ctx.link,
+                    this.ctx.api,
+                    'serverInfo',
+                ].join(''),
+                options =
+                {
+                    timeout: this.ctx.timeout,
+                    uri: uri,
+                    method: 'POST',
+                    json: true,
+                    headers:
+                    {
+                        'Cookie': this.ctx.cookies.join(';')
+                    }
+                };
 
-            if ( typeof cb === 'function' )
+            if ( this.IsLoggedin() )
             {
-                cb.call(this, info);
+                this.DoRequest(options, cb,
+                    function OK(error, response, body)
+                    {
+                        console.log('Jiraffe.GetServerInfo() OK:', body);
+                    },
+                    function Failed(error, response, body)
+                    {
+                        console.log('Jiraffe.GetServerInfo() Error:', 'Failed.');
+                    }
+                );
             }
 
             return this;
@@ -112,11 +163,6 @@ exports.Jiraffe = function(link, user, password)
         GetUnresolvedIssueCountFor: function(id, cb)
         {
             var issues = {};
-
-            if ( typeof cb === 'function' )
-            {
-                cb.call(this, issues);
-            }
 
             return this;
         }

@@ -24,32 +24,50 @@ var Jiraffe = require('./jiraffe.js').Jiraffe;
 
 try
 {
+    // Constructor
     var jiraffe = new Jiraffe('http://jira.lan/', 'user', 'pwddwp');
+
+    // Initialize()
     jiraffe.Initialize();
-    jiraffe.Login(function()
+
+    // Login()
+    jiraffe.Login(function(data)
     {
         if ( jiraffe.IsLoggedin() )
         {
-            var info = jiraffe.GetServerInfo();
-            console.dir(info);
+            // GetServerInfo()
+            jiraffe.GetServerInfo(function(info)
+            {
+                if ( IsObjectEmpty(info) )
+                    throw new Error('Jiraffe test error: Empty reply for GetServerInfo()');
 
-            jiraffe.GetUnresolvedIssueCountFor(11101, function(utrunk){
+                console.dir(info);
             });
-            jiraffe.GetUnresolvedIssueCountFor(11800);
 
-            if ( IsObjectEmpty(uTrunk) )
-                throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(trunk)');
+            // GetUnresolvedIssueCountFor()
+            jiraffe.GetUnresolvedIssueCountFor(11101, function(utrunk)
+            {
+                if ( IsObjectEmpty(utrunk) )
+                    throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(trunk)');
 
-            if ( IsObjectEmpty(uStable) )
-                throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(stable)');
+                console.dir(utrunk);
+            });
 
-            console.dir(uTrunk),
-                console.dir(uStable);
+            // GetUnresolvedIssueCountFor()
+            jiraffe.GetUnresolvedIssueCountFor(11800, function(ustable)
+            {
+                if ( IsObjectEmpty(ustable) )
+                    throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(stable)');
+
+                console.dir(ustable);
+            });
         }
         else
         {
             throw new Error('Jiraffe test error: Unable to login.');
         }
+
+        // Terminate()
         jiraffe.Terminate();
     });
 }
