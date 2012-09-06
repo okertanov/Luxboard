@@ -25,6 +25,7 @@ exports.Jiraffe = function(link, user, password)
             link: link,
             user: user,
             password: password,
+            timeout: 10000,
             api:  '/rest/api/latest/',
             auth: '/rest/auth/1/'
         },
@@ -47,6 +48,7 @@ exports.Jiraffe = function(link, user, password)
                 ].join(''),
                 options =
                 {
+                    timeout: this.ctx.timeout,
                     uri: uri,
                     method: 'POST',
                     json: true,
