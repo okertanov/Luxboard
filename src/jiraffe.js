@@ -42,7 +42,6 @@ exports.Jiraffe = function(link, user, password)
             var that = this,
                 data = null;
 
-
             console.log('Jiraffe.DoRequest() URI:', options.uri);
 
             request(options, function(error, response, body)

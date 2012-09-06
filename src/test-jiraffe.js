@@ -15,9 +15,9 @@
 // Strict mode by default
 "use strict";
 
-function IsObjectEmpty(o)
+function IsObjectEmpty(obj)
 {
-    return Object.keys(o).length === 0;
+    return Object.keys(obj).length === 0;
 }
 
 var Jiraffe = require('./jiraffe.js').Jiraffe;
@@ -78,7 +78,7 @@ catch(e)
 
 process.on('uncaughtException', function(e)
 {
-    console.log('uncaughtException:', e);
+    console.log('Jiraffe test uncaught exception:', e);
 });
 
 })();
