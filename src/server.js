@@ -19,7 +19,6 @@
 var os      = require('os'),
     fs      = require('fs'),
     path    = require('path'),
-    process = require('process'),
     http    = require('http'),
     express = require('express'),
     app     = express(),
@@ -54,12 +53,12 @@ var server = app.listen(WWWPort);
 
 // BTS polling Task
 var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
-    console.dir(this.ctx.tame);
+    console.log(this.ctx.name);
 })).Initialize();
 
 // Cis polling Task
 var CisTask = (new Periodic(CisName, CisTimeout, function(){
-    console.dir(this.ctx.tame);
+    console.log(this.ctx.name);
 })).Initialize();
 
 // Socket.io
@@ -109,7 +108,7 @@ function DumpStat()
 {
     var mem = process.memoryUsage(),
         stat = [
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
         'Process: ' + process.title + '(' + process.pid + ')' + 'on ' + 'node.js '
                     + process.version + ' for '
                     + process.platform + '/' + process.arch,
@@ -117,7 +116,7 @@ function DumpStat()
         'Uptime:  ' + Math.floor(process.uptime() / 60) + ' min.',
         'Memory:  ' + 'RSS: ' + mem.rss + ' and Heap: '
                     + mem.heapUsed + ' of ' + mem.heapTotal + '.',
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
         ''
     ].join('\n');
 

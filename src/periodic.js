@@ -23,7 +23,8 @@ exports.Periodic = function(name, timeout, fn, args)
             name:       name,
             timeout:    timeout,
             fn:         fn,
-            args:       args
+            args:       args,
+            timer:      null
         },
         Initialize: function()
         {
@@ -32,13 +33,13 @@ exports.Periodic = function(name, timeout, fn, args)
         },
         Terminate: function()
         {
-            this.StopTimeout();
+            this.StopPeriodic();
             return this;
         },
-        StartTimeout: function()
+        StartPeriodic: function()
         {
             var that = this;
-            this.ctx.timeout = setTimeout(function()
+            this.ctx.timer = setTimeout(function()
                 {
                     // Call the callback when provided
                     if ( typeof that.ctx.fn === 'function' )
@@ -47,9 +48,9 @@ exports.Periodic = function(name, timeout, fn, args)
                     }
 
                     // Re-launch self if enabled
-                    if ( this.ctx.timeout !== null )
+                    if ( that.ctx.timer !== null )
                     {
-                        that.StartTimeout();
+                        that.StartPeriodic();
                     }
                 },
                 this.ctx.timeout
@@ -57,12 +58,12 @@ exports.Periodic = function(name, timeout, fn, args)
 
             return this;
         },
-        StopTimeout: function()
+        StopPeriodic: function()
         {
-            if ( this.ctx.timeout )
+            if ( this.ctx.timer )
             {
-                clearTimeout(this.ctx.timeout),
-                    this.ctx.timeout = null;
+                clearTimeout(this.ctx.timr),
+                    this.ctx.timer = null;
             }
 
             return this;
