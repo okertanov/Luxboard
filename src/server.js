@@ -30,7 +30,7 @@ var os      = require('os'),
     Configuration = require('./configuration.js').Configuration;
 
 // Configuration & Pathes
-var Config      =  new Configuration('~/luxboard.config.json');
+var Config      =  new Configuration('~/luxboard.config.json'),
     WWWPort     =  Config.luxboard.port,
     ServerRoot  =  __dirname,
     ProjectRoot =  path.normalize(ServerRoot + '/../'),

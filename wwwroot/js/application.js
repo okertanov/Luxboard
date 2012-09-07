@@ -34,7 +34,7 @@ $(function($, exports)
     try
     {
         var that = this,
-            app = new exports.Application();
+            app = new Luxboard.Application();
 
         app.Initialize();
 

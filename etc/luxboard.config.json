@@ -2,7 +2,7 @@
     "luxboard":
     {
         "port": 8888
-    }
+    },
     "jiraffe":
     {
         "host":     "http://jira.lan",
