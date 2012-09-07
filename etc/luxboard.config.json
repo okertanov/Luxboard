@@ -1,0 +1,15 @@
+{
+    "luxboard":
+    {
+        "port": 8888
+    }
+    "jiraffe":
+    {
+        "host":     "http://jira.lan",
+        "username": "user",
+        "password": "abcdefgh",
+        "trunk":  11111,
+        "stable": 11110
+    }
+}
+
