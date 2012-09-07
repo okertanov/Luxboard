@@ -20,61 +20,126 @@ var os      = require('os'),
     fs      = require('fs'),
     path    = require('path'),
     http    = require('http'),
+    util    = require("util"),
+    events =  require('events'),
     express = require('express'),
-    app     = express(),
+    App     = express(),
     Periodic = require('./periodic.js').Periodic,
-    ApiController = require('./api-controller.js').ApiController;
+    ApiController = require('./api-controller.js').ApiController,
+    Jiraffe = require('./jiraffe.js').Jiraffe,
+    Configuration = require('./configuration.js').Configuration;
 
 // Configuration & Pathes
-var WWWPort = 8888,
-    ServerRoot  = __dirname,
-    ProjectRoot = path.normalize(ServerRoot + '/../'),
-    WWWRoot     = path.normalize(ProjectRoot + '/wwwroot/'),
-    BtsName     = 'BTS Task',
-    BtsTimeout  = 60000, // 1 min
-    CisName     = 'CIS Task',
-    CisTimeout  = 120000; // 2 min
+var Config      =  new Configuration('~/luxboard.config.json');
+    WWWPort     =  Config.luxboard.port,
+    ServerRoot  =  __dirname,
+    ProjectRoot =  path.normalize(ServerRoot + '/../'),
+    WWWRoot     =  path.normalize(ProjectRoot + '/wwwroot/'),
+    BtsName     =  'BTS Task',
+    BtsTimeout  =  60000, // 1 min
+    CisName     =  'CIS Task',
+    CisTimeout  =  120000; // 2 min
 
 // Express application
-app.configure(function () {
-  app.use(express.logger());
-  app.use(express.static(WWWRoot));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+App.configure(function () {
+  App.use(express.logger());
+  App.use(express.static(WWWRoot));
+  App.use(express.bodyParser());
+  App.use(express.methodOverride());
+  App.use(App.router);
+  App.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
 // Router
-ApiController.Initialize().Route(app);
+ApiController.Initialize().Route(App);
+
+// Jiraffe
+var jira = new Jiraffe( Config.jiraffe.host,
+                        Config.jiraffe.username,
+                        Config.jiraffe.password ).Initialize();
+
+// Jira Updater
+function UpdateJiraData(jira, io)
+{
+    if ( jira.IsLoggedin() )
+    {
+        jira.GetUnresolvedIssueCountFor(Config.jiraffe.trunk, function(trunk)
+        {
+            if ( typeof trunk === 'object' && trunk.hasOwnProperty('issuesUnresolvedCount') )
+            {
+                io.sockets.emit('Luxboard.jiraffe.trunk.unresolved', trunk.issuesUnresolvedCount);
+            }
+        });
+
+        jira.GetUnresolvedIssueCountFor(Config.jiraffe.stable, function(stable)
+        {
+            if ( typeof stable === 'object' && stable.hasOwnProperty('issuesUnresolvedCount') )
+            {
+                io.sockets.emit('Luxboard.jiraffe.stable.unresolved', stable.issuesUnresolvedCount);
+            }
+        });
+    }
+}
 
 // BTS polling Task
 var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
-    console.log(this.ctx.name);
+    console.log('Inside', this.ctx.name);
+
+    try
+    {
+        if ( !jira.IsLoggedin() )
+        {
+            jira.Login(function(data)
+            {
+                UpdateJiraData(jira, Io);
+            });
+        }
+        else
+        {
+            UpdateJiraData(jira, Io);
+        }
+    }
+    catch(e)
+    {
+        console.log('Luxboard Server:', 'Error:', e);
+        jira.Logout();
+    }
 })).Initialize();
 
 // Cis polling Task
 var CisTask = (new Periodic(CisName, CisTimeout, function(){
-    console.log(this.ctx.name);
+    console.log('Inside', this.ctx.name);
 })).Initialize();
 
 // Express Server
-var server = app.listen(WWWPort);
+var Server = App.listen(WWWPort);
 
 // Socket.io
-var io = require('socket.io').listen(server);
+var Io = require('socket.io').listen(Server);
 
-io.on('connection', function(socket)
+Io.on('connection', function(socket)
 {
     console.log('Socket.io connection.');
 
-    socket.on('message', function (msg)
+    socket.on('Luxboard.service.ping', function(msg)
     {
-        console.log('Socket.io message received: ', msg);
-        socket.broadcast.emit('message', msg);
+        console.log('Socket.io ping received: ', msg);
+        socket.emit('Luxboard.service.ack', msg);
     });
 
-    socket.on('disconnect', function(){
+    socket.on('Luxboard.service.message', function(msg)
+    {
+        console.log('Socket.io service message received: ', msg);
+        socket.emit('Luxboard.service.ack', msg);
+    });
+
+    socket.on('Luxboard.service.ack', function(msg)
+    {
+        console.log('Socket.io ack received: ', msg);
+    });
+
+    socket.on('disconnect', function()
+    {
         console.log('Socket.io disconnect.');
     });
 });

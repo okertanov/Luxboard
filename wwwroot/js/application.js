@@ -29,7 +29,7 @@
     @attention So try to avoid direct code invocation at the top of current namespace
                and here, in DOM's ready handler.
 */
-$(function()
+$(function($, exports)
 {
     try
     {
@@ -59,6 +59,7 @@ exports.Application = function()
     return {
         ctx:
         {
+            socket: null
         },
         Initialize: function()
         {
@@ -66,7 +67,8 @@ exports.Application = function()
 
             try
             {
-                this.InitializeUI();
+                this.InitializeUI(),
+                    this.InitializeIO();
             }
             catch(e)
             {
@@ -83,6 +85,53 @@ exports.Application = function()
         },
         InitializeUI: function()
         {
+            return this;
+        },
+        InitializeIO: function()
+        {
+            var socket = this.ctx.socket = io.connect();
+
+            socket.on('connect', function()
+            {
+                console.log('Socket.io connection.');
+                $(document).attr("title", $(document).attr("title") + ' - [Connected]');
+
+                socket.on('Luxboard.service.ping', function(msg)
+                {
+                    console.log('Socket.io ping received: ', msg);
+                    socket.emit('Luxboard.service.ack', msg);
+                });
+
+                socket.on('Luxboard.service.message', function(msg)
+                {
+                    console.log('Socket.io service message received: ', msg);
+                    socket.emit('Luxboard.service.ack', msg);
+                });
+
+                socket.on('Luxboard.service.ack', function(msg)
+                {
+                    console.log('Socket.io ack received: ', msg);
+                });
+
+                socket.on('disconnect', function()
+                {
+                    console.log('Socket.io disconnect.');
+                });
+
+                socket.on('Luxboard.jiraffe.trunk.unresolved', function(msg)
+                {
+                    console.log('Socket.io Luxboard.jiraffe.trunk.unresolved received: ', msg);
+                    var num = (isNaN(parseInt(msg)) ? 0 : parseInt(msg));
+                    $('#left.issues .counter').text(num);
+                });
+
+                socket.on('Luxboard.jiraffe.stable.unresolved', function(msg)
+                {
+                    console.log('Socket.io Luxboard.jiraffe.stable.unresolved received: ', msg);
+                    var num = (isNaN(parseInt(msg)) ? 0 : parseInt(msg));
+                    $('#right.issues .counter').text(num);
+                });
+            });
             return this;
         }
     };

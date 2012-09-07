@@ -29,20 +29,20 @@ try
     var config = new Configuration('~/luxboard.config.json');
 
     // Constructor
-    var jiraffe = new Jiraffe( config.jiraffe.host,
-                               config.jiraffe.username,
-                               config.jiraffe.password );
+    var jira = new Jiraffe( config.jiraffe.host,
+                            config.jiraffe.username,
+                            config.jiraffe.password );
 
     // Initialize()
-    jiraffe.Initialize();
+    jira.Initialize();
 
     // Login()
-    jiraffe.Login(function(data)
+    jira.Login(function(data)
     {
-        if ( jiraffe.IsLoggedin() )
+        if ( jira.IsLoggedin() )
         {
             // GetServerInfo()
-            jiraffe.GetServerInfo(function(info)
+            jira.GetServerInfo(function(info)
             {
                 if ( IsObjectEmpty(info) )
                     throw new Error('Jiraffe test error: Empty reply for GetServerInfo()');
@@ -51,21 +51,21 @@ try
             });
 
             // GetUnresolvedIssueCountFor()
-            jiraffe.GetUnresolvedIssueCountFor(11101, function(utrunk)
+            jira.GetUnresolvedIssueCountFor(config.jiraffe.trunk, function(trunk)
             {
-                if ( IsObjectEmpty(utrunk) )
+                if ( IsObjectEmpty(trunk) )
                     throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(trunk)');
 
-                console.dir(utrunk);
+                console.dir(trunk);
             });
 
             // GetUnresolvedIssueCountFor()
-            jiraffe.GetUnresolvedIssueCountFor(11800, function(ustable)
+            jira.GetUnresolvedIssueCountFor(config.jiraffe.stable, function(stable)
             {
-                if ( IsObjectEmpty(ustable) )
+                if ( IsObjectEmpty(stable) )
                     throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(stable)');
 
-                console.dir(ustable);
+                console.dir(stable);
             });
         }
         else
@@ -74,7 +74,7 @@ try
         }
 
         // Terminate()
-        jiraffe.Terminate();
+        jira.Terminate();
     });
 }
 catch(e)

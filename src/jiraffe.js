@@ -112,6 +112,10 @@ exports.Jiraffe = function(link, user, password)
 
             return this;
         },
+        Logout: function()
+        {
+            this.ctx.logged = false;
+        },
         IsLoggedin: function()
         {
             return this.ctx.logged;
