@@ -15,17 +15,26 @@
 // Strict mode by default
 "use strict";
 
+var fs = require('fs'),
+    path = require('path'),
+    Jiraffe = require('./jiraffe.js').Jiraffe;
+
 function IsObjectEmpty(obj)
 {
     return Object.keys(obj).length === 0;
 }
 
-var Jiraffe = require('./jiraffe.js').Jiraffe;
-
 try
 {
+    // Configuration
+    var cfgfile = '~/luxboard.config.json';
+    cfgfile = path.normalize(cfgfile.replace(/^~/, process.env['HOME']));
+    var config = JSON.parse(fs.readFileSync(cfgfile));
+
     // Constructor
-    var jiraffe = new Jiraffe('http://jira.lan', 'user', 'pwddwp');
+    var jiraffe = new Jiraffe( config.jiraffe.host,
+                               config.jiraffe.username,
+                               config.jiraffe.password );
 
     // Initialize()
     jiraffe.Initialize();
