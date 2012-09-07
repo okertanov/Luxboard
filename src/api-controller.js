@@ -9,7 +9,7 @@
     @see LICENSE file
 */
 
-(function()
+(function(exports)
 {
 
 // Strict mode by default
@@ -134,5 +134,5 @@ exports.ApiController =
     }
 };
 
-})();
+})((typeof exports !== 'undefined' ? exports : this));
 

@@ -9,7 +9,7 @@
     @see LICENSE file
 */
 
-(function()
+(function(exports)
 {
 
 // Strict mode by default
@@ -71,5 +71,5 @@ exports.ApiDb =
     }
 };
 
-})();
+})((typeof exports !== 'undefined' ? exports : this));
 

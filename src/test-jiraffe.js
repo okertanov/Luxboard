@@ -15,9 +15,8 @@
 // Strict mode by default
 "use strict";
 
-var fs = require('fs'),
-    path = require('path'),
-    Jiraffe = require('./jiraffe.js').Jiraffe;
+var Jiraffe = require('./jiraffe.js').Jiraffe,
+    Configuration = require('./configuration.js').Configuration;
 
 function IsObjectEmpty(obj)
 {
@@ -27,9 +26,7 @@ function IsObjectEmpty(obj)
 try
 {
     // Configuration
-    var cfgfile = '~/luxboard.config.json';
-    cfgfile = path.normalize(cfgfile.replace(/^~/, process.env['HOME']));
-    var config = JSON.parse(fs.readFileSync(cfgfile));
+    var config = new Configuration('~/luxboard.config.json');
 
     // Constructor
     var jiraffe = new Jiraffe( config.jiraffe.host,
