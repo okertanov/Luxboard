@@ -39,14 +39,16 @@ exports.Periodic = function(name, timeout, fn, args)
         StartPeriodic: function()
         {
             var that = this;
+
+            // Call the callback when provided
+            if ( typeof that.ctx.fn === 'function' )
+            {
+                fn.apply(that, that.ctx.args);
+            }
+
+            // Schedule next run
             this.ctx.timer = setTimeout(function()
                 {
-                    // Call the callback when provided
-                    if ( typeof that.ctx.fn === 'function' )
-                    {
-                        fn.apply(that, that.ctx.args);
-                    }
-
                     // Re-launch self if enabled
                     if ( that.ctx.timer !== null )
                     {

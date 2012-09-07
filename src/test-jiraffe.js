@@ -59,13 +59,13 @@ try
                 console.dir(trunk);
             });
 
-            // GetUnresolvedIssueCountFor()
-            jira.GetUnresolvedIssueCountFor(config.jiraffe.stable, function(stable)
+            // GetRelatedIssueCountFor()
+            jira.GetRelatedIssueCountFor(config.jiraffe.trunk, function(trunk)
             {
-                if ( IsObjectEmpty(stable) )
-                    throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(stable)');
+                if ( IsObjectEmpty(trunk) )
+                    throw new Error('Jiraffe test error: Empty reply for GetRelatedIssueCountFor(trunk)');
 
-                console.dir(stable);
+                console.dir(trunk);
             });
         }
         else
