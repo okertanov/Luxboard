@@ -18,9 +18,9 @@
 var fs = require('fs'),
     path = require('path');
 
-exports.Configuration = function(file)
+exports.Configuration = function(filename)
 {
-    var cfgfile = path.normalize(cfgfile.replace(/^~/, process.env['HOME']));
+    var cfgfile = path.normalize(filename.replace(/^~/, process.env['HOME'])),
         contents = fs.readFileSync(cfgfile);
     return JSON.parse(contents);
 };
