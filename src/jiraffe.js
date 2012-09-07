@@ -187,6 +187,41 @@ exports.Jiraffe = function(link, user, password)
             }
 
             return this;
+        },
+        GetRelatedIssueCountFor: function(id, cb)
+        {
+            var that = this,
+                uri =
+                [
+                    this.ctx.link,
+                    this.ctx.api,
+                    'version',
+                    '/',id,'/',
+                    'relatedIssueCounts'
+                ].join(''),
+                options =
+                {
+                    timeout: this.ctx.timeout,
+                    uri: uri,
+                    method: 'GET',
+                    json: true
+                };
+
+            if ( this.IsLoggedin() )
+            {
+                this.DoRequest(options, cb,
+                    function OK(error, response, body)
+                    {
+                        console.log('Jiraffe.GetRelatedIssueCountFor() OK.');
+                    },
+                    function Failed(error, response, body)
+                    {
+                        console.log('Jiraffe.GetRelatedIssueCountFor() Error:', 'Failed.');
+                    }
+                );
+            }
+
+            return this;
         }
     };
 };
