@@ -85,6 +85,8 @@ exports.Application = function()
         },
         InitializeUI: function()
         {
+            $(document).bind('touchmove', false);
+
             return this;
         },
         InitializeIO: function()
