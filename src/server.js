@@ -75,7 +75,7 @@ function UpdateJiraData(jira, io)
         {
             if ( typeof stable === 'object' && stable.hasOwnProperty('issuesUnresolvedCount') )
             {
-                io.sockets.emit('juxboard.jiraffe.stable.unresolved', stable.issuesUnresolvedCount);
+                io.sockets.emit('luxboard.jiraffe.stable.unresolved', stable.issuesUnresolvedCount);
             }
         });
     }
