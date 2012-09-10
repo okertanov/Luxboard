@@ -67,7 +67,7 @@ function UpdateJiraData(jira, io)
         {
             if ( typeof trunk === 'object' && trunk.hasOwnProperty('issuesUnresolvedCount') )
             {
-                io.sockets.emit('Luxboard.jiraffe.trunk.unresolved', trunk.issuesUnresolvedCount);
+                io.sockets.emit('luxboard.jiraffe.trunk.unresolved', trunk.issuesUnresolvedCount);
             }
         });
 
@@ -75,7 +75,7 @@ function UpdateJiraData(jira, io)
         {
             if ( typeof stable === 'object' && stable.hasOwnProperty('issuesUnresolvedCount') )
             {
-                io.sockets.emit('Luxboard.jiraffe.stable.unresolved', stable.issuesUnresolvedCount);
+                io.sockets.emit('juxboard.jiraffe.stable.unresolved', stable.issuesUnresolvedCount);
             }
         });
     }
