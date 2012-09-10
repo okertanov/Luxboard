@@ -121,19 +121,19 @@ Io.on('connection', function(socket)
 {
     console.log('Socket.io connection.');
 
-    socket.on('Luxboard.service.ping', function(msg)
+    socket.on('luxboard.service.ping', function(msg)
     {
         console.log('Socket.io ping received: ', msg);
-        socket.emit('Luxboard.service.ack', msg);
+        socket.emit('luxboard.service.ack', msg);
     });
 
-    socket.on('Luxboard.service.message', function(msg)
+    socket.on('luxboard.service.message', function(msg)
     {
         console.log('Socket.io service message received: ', msg);
-        socket.emit('Luxboard.service.ack', msg);
+        socket.emit('luxboard.service.ack', msg);
     });
 
-    socket.on('Luxboard.service.ack', function(msg)
+    socket.on('luxboard.service.ack', function(msg)
     {
         console.log('Socket.io ack received: ', msg);
     });

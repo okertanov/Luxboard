@@ -96,19 +96,19 @@ exports.Application = function()
                 console.log('Socket.io connection.');
                 $(document).attr("title", $(document).attr("title") + ' - [Connected]');
 
-                socket.on('Luxboard.service.ping', function(msg)
+                socket.on('luxboard.service.ping', function(msg)
                 {
                     console.log('Socket.io ping received: ', msg);
-                    socket.emit('Luxboard.service.ack', msg);
+                    socket.emit('luxboard.service.ack', msg);
                 });
 
-                socket.on('Luxboard.service.message', function(msg)
+                socket.on('luxboard.service.message', function(msg)
                 {
                     console.log('Socket.io service message received: ', msg);
-                    socket.emit('Luxboard.service.ack', msg);
+                    socket.emit('luxboard.service.ack', msg);
                 });
 
-                socket.on('Luxboard.service.ack', function(msg)
+                socket.on('luxboard.service.ack', function(msg)
                 {
                     console.log('Socket.io ack received: ', msg);
                 });
@@ -118,16 +118,16 @@ exports.Application = function()
                     console.log('Socket.io disconnect.');
                 });
 
-                socket.on('Luxboard.jiraffe.trunk.unresolved', function(msg)
+                socket.on('luxboard.jiraffe.trunk.unresolved', function(msg)
                 {
-                    console.log('Socket.io Luxboard.jiraffe.trunk.unresolved received: ', msg);
+                    console.log('Socket.io luxboard.jiraffe.trunk.unresolved received: ', msg);
                     var num = (isNaN(parseInt(msg)) ? 0 : parseInt(msg));
                     $('#left.issues .counter').text(num);
                 });
 
-                socket.on('Luxboard.jiraffe.stable.unresolved', function(msg)
+                socket.on('luxboard.jiraffe.stable.unresolved', function(msg)
                 {
-                    console.log('Socket.io Luxboard.jiraffe.stable.unresolved received: ', msg);
+                    console.log('Socket.io luxboard.jiraffe.stable.unresolved received: ', msg);
                     var num = (isNaN(parseInt(msg)) ? 0 : parseInt(msg));
                     $('#right.issues .counter').text(num);
                 });
