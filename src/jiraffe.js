@@ -161,7 +161,7 @@ exports.Jiraffe = function(link, user, password)
                     this.ctx.link,
                     this.ctx.api,
                     'version',
-                    '/',id,'/',
+                    '/', id, '/',
                     'unresolvedIssueCount'
                 ].join(''),
                 options =
@@ -196,7 +196,7 @@ exports.Jiraffe = function(link, user, password)
                     this.ctx.link,
                     this.ctx.api,
                     'version',
-                    '/',id,'/',
+                    '/', id ,'/',
                     'relatedIssueCounts'
                 ].join(''),
                 options =
@@ -217,6 +217,82 @@ exports.Jiraffe = function(link, user, password)
                     function Failed(error, response, body)
                     {
                         console.log('Jiraffe.GetRelatedIssueCountFor() Error:', 'Failed.');
+                    }
+                );
+            }
+
+            return this;
+        },
+        GetIssue: function(id, cb)
+        {
+            var that = this,
+                uri =
+                [
+                    this.ctx.link,
+                    this.ctx.api,
+                    'issue',
+                    '/', id
+                ].join(''),
+                options =
+                {
+                    timeout: this.ctx.timeout,
+                    uri: uri,
+                    method: 'GET',
+                    json: true
+                };
+
+            if ( this.IsLoggedin() )
+            {
+                this.DoRequest(options, cb,
+                    function OK(error, response, body)
+                    {
+                        console.log('Jiraffe.GetIssue() OK.');
+                    },
+                    function Failed(error, response, body)
+                    {
+                        console.log('Jiraffe.GetIssue() Error:', 'Failed.');
+                    }
+                );
+            }
+
+            return this;
+        },
+        SearchWithJql: function(jql, start, max)
+        {
+            var jql = jql || '',
+                start = start || 0,
+                max = max || 100;
+                that = this,
+                uri =
+                [
+                    this.ctx.link,
+                    this.ctx.api,
+                    'search'
+                ].join(''),
+                options =
+                {
+                    timeout: this.ctx.timeout,
+                    uri: uri,
+                    method: 'POST',
+                    json: true,
+                    body:
+                    {
+                        'jql': jql,
+                        'startAt': start,
+                        'maxResults': max
+                    }
+                };
+
+            if ( this.IsLoggedin() )
+            {
+                this.DoRequest(options, cb,
+                    function OK(error, response, body)
+                    {
+                        console.log('Jiraffe.SearchWithJql() OK.');
+                    },
+                    function Failed(error, response, body)
+                    {
+                        console.log('Jiraffe.SearchWithJql() Error:', 'Failed.');
                     }
                 );
             }
