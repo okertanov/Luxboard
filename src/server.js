@@ -81,10 +81,8 @@ function UpdateJiraData(jira, io)
     }
 }
 
-// BTS polling Task
-var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
-    console.log('Inside', this.ctx.name);
-
+function UpdateJiraPeriodicTask()
+{
     try
     {
         if ( !jira.IsLoggedin() )
@@ -104,6 +102,14 @@ var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
         console.log('Luxboard Server:', 'Error:', e);
         jira.Logout();
     }
+}
+
+// BTS polling Task
+var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
+    console.log('Inside', this.ctx.name);
+
+    UpdateJiraPeriodicTask();
+
 })).Initialize();
 
 // Cis polling Task
@@ -120,6 +126,8 @@ var Io = require('socket.io').listen(Server);
 Io.on('connection', function(socket)
 {
     console.log('Socket.io connection.');
+
+    UpdateJiraPeriodicTask();
 
     socket.on('luxboard.service.ping', function(msg)
     {
