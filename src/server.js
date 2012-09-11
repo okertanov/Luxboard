@@ -43,13 +43,14 @@ var Config      =  new Configuration('~/luxboard.config.json'),
     CisTimeout  =  120000; // 2 min
 
 // Express application
-App.configure(function () {
-  App.use(express.logger());
-  App.use(express.static(WWWRoot));
-  App.use(express.bodyParser());
-  App.use(express.methodOverride());
-  App.use(App.router);
-  App.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+App.configure(function ()
+{
+    App.use(express.logger());
+    App.use(express.static(WWWRoot));
+    App.use(express.bodyParser());
+    App.use(express.methodOverride());
+    App.use(App.router);
+    App.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
 // Database
@@ -68,55 +69,36 @@ function UpdateJiraData(jira, socket)
 {
     if ( jira.IsLoggedin() )
     {
-        // Trunk
-        jira.GetUnresolvedIssueCountFor(Config.jiraffe.trunk, function(trunk)
+        // Trunk && Stable
+        if ( Config.jiraffe.versions.length )
         {
-            if ( typeof trunk === 'object' && trunk.hasOwnProperty('issuesUnresolvedCount') )
+            Config.jiraffe.versions.forEach(function(ver, idx, arr)
             {
-                socket.emit('luxboard.jiraffe.trunk.unresolved', trunk.issuesUnresolvedCount);
-
-                DbGetLastJiraVersionById(Config.jiraffe.project, Config.jiraffe.trunk, function(projectkey, versionid, version, err)
+                jira.GetUnresolvedIssueCountFor(ver.version, function(data)
                 {
-                    if ( version && version.unresolved && version.unresolved === trunk.issuesUnresolvedCount )
+                    if ( typeof data === 'object' && data.hasOwnProperty('issuesUnresolvedCount') )
                     {
-                        // Handle duplicate
-                    }
-                    else
-                    {
-                        DbStoreJiraVersion({
-                            projectkey: Config.jiraffe.project,
-                            versionid:  Config.jiraffe.trunk,
-                            unresolved: trunk.issuesUnresolvedCount
+                        socket.emit('luxboard.jiraffe.' + ver.name + '.unresolved', data.issuesUnresolvedCount);
+
+                        DbGetLastJiraVersionById(ver.project, ver.version, function(projectkey, versionid, dbversion, err)
+                        {
+                            if ( dbversion && dbversion.unresolved && dbversion.unresolved === data.issuesUnresolvedCount )
+                            {
+                                // Handle duplicate
+                            }
+                            else
+                            {
+                                DbStoreJiraVersion({
+                                    projectkey: ver.project,
+                                    versionid:  ver.version,
+                                    unresolved: data.issuesUnresolvedCount
+                                });
+                            }
                         });
                     }
                 });
-            }
-        });
-
-        // Stable
-        jira.GetUnresolvedIssueCountFor(Config.jiraffe.stable, function(stable)
-        {
-            if ( typeof stable === 'object' && stable.hasOwnProperty('issuesUnresolvedCount') )
-            {
-                socket.emit('luxboard.jiraffe.stable.unresolved', stable.issuesUnresolvedCount);
-
-                DbGetLastJiraVersionById(Config.jiraffe.project, Config.jiraffe.stable, function(projectkey, versionid, version, err)
-                {
-                    if ( version && version.unresolved && version.unresolved === stable.issuesUnresolvedCount )
-                    {
-                        // Handle duplicate
-                    }
-                    else
-                    {
-                        DbStoreJiraVersion({
-                            projectkey: Config.jiraffe.project,
-                            versionid:  Config.jiraffe.stable,
-                            unresolved: stable.issuesUnresolvedCount
-                        });
-                    }
-                });
-            }
-        });
+            });
+        }
     }
 }
 
@@ -151,11 +133,11 @@ function DbStoreJiraVersion(v, fn)
     {
         if ( !err )
         {
-            console.log('StoreJiraVersion():', 'OK');
+            console.log('DbStoreJiraVersion():', 'OK');
         }
         else
         {
-            console.log('StoreJiraVersion():', 'Error:', err);
+            console.log('DbStoreJiraVersion():', 'Error:', err);
         }
 
         if ( typeof fn === 'function' )
@@ -236,16 +218,20 @@ var CisTask = (new Periodic(CisName, CisTimeout, function(){
 
 // Process handlers
 process
-    .on('exit', function() {
+    .on('exit', function()
+    {
         Cleanup();
     })
-    .on('uncaughtException', function(e){
+    .on('uncaughtException', function(e)
+    {
         console.log('uncaughtException:', e);
     })
-    .on('SIGUSR1', function() {
+    .on('SIGUSR1', function()
+    {
         DumpStat();
     })
-    .on('SIGINT', function() {
+    .on('SIGINT', function()
+    {
         Cleanup();
         process.exit();
     });
