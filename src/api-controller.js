@@ -15,18 +15,19 @@
 // Strict mode by default
 "use strict";
 
-var underscore = require('underscore')._,
-    Db = require('./api-db.js'),
-    ApiDb = Db.ApiDb,
-    DbName = 'Luxboard';
+var underscore = require('underscore')._;
 
 exports.ApiController =
 {
-    Initialize: function()
+    ctx:
+    {
+        db: null
+    }
+    Initialize: function(db)
     {
         console.log('ApiController.Initialize');
 
-        ApiDb.Connect(DbName);
+        this.ctx.db = db;
 
         return this;
     },
@@ -34,30 +35,52 @@ exports.ApiController =
     {
         console.log('ApiController.Terminate');
 
-        ApiDb.Disconnect();
+        this.ctx.db = null;
 
         return this;
     },
-    ProductsGet: function(req, res, next)
+    VersionsGet: function(req, res, next)
     {
-        console.log('ApiController.ProductsGet');
-
-        var response = [];
-
-        this.SendJson(res, response);
-
-        return this;
-    },
-    ProductGet: function(req, res, next)
-    {
-        console.log('ApiController.ProductGet');
+        console.log('ApiController.VersionsGet');
 
         var that = this,
-            product = req.params.product || req.body.product;
+            limit = 100,
+            response = [],
+            proj = req.params.proj || req.body.proj;
 
-        var response = {product: product};
+        this.ctx.db.Version.find({projectkey: proj}).sort('date', -1).limit(limit)
+            .execFind(function(err, versions)
+            {
+                if ( !err )
+                {
+                    response = versions;
+                }
 
-        this.SendJson(res, response);
+                that.SendJson(res, response);
+            });
+
+        return this;
+    },
+    VersionGet: function(req, res, next)
+    {
+        console.log('ApiController.VersionGet');
+
+        var that = this,
+            limit = 30,
+            response = [],
+            proj = req.params.proj || req.body.proj,
+            ver  = req.params.ver  || req.body.ver;
+
+        this.ctx.db.Version.find({projectkey: proj, versionid:  ver}).sort('date', -1).limit(limit)
+            .execFind(function(err, versions)
+            {
+                if ( !err )
+                {
+                    response = versions;
+                }
+
+                that.SendJson(res, response);
+            });
 
         return this;
     },
@@ -89,7 +112,7 @@ exports.ApiController =
         console.log('ApiController.BuildGet');
 
         var that = this,
-            command = req.params.build || req.body.build,
+            command = req.params.command || req.body.command,
             data = req.params.data || req.body.data;
 
         var response = {};
@@ -123,12 +146,12 @@ exports.ApiController =
 
         var that = this;
 
-        app.get(  '/api/products',           function(req, res, next){ that.ProductsGet.call(that, req, res, next); } );
-        app.get(  '/api/products/:product',  function(req, res, next){ that.ProductGet.call(that, req, res, next); } );
-        app.get(  '/api/builds',             function(req, res, next){ that.BuildsGet.call(that, req, res, next); } );
-        app.get(  '/api/builds/:build',      function(req, res, next){ that.BuildGet.call(that, req, res, next); } );
-        app.post( '/api/admin',              function(req, res, next){ that.AdminPost.call(that, req, res, next); } );
-        app.all(  '/*',                      function(req, res, next){ that.Default.call(that, req, res, next); } );
+        app.get(  '/api/versions/:proj',        function(req, res, next){ that.VersionsGet.call(that, req, res, next); } );
+        app.get(  '/api/versions/:proj/:ver',   function(req, res, next){ that.VersionGet.call(that, req, res, next); } );
+        app.get(  '/api/builds',                function(req, res, next){ that.BuildsGet.call(that, req, res, next); } );
+        app.get(  '/api/builds/:build',         function(req, res, next){ that.BuildGet.call(that, req, res, next); } );
+        app.post( '/api/admin',                 function(req, res, next){ that.AdminPost.call(that, req, res, next); } );
+        app.all(  '/*',                         function(req, res, next){ that.Default.call(that, req, res, next); } );
 
         return this;
     }

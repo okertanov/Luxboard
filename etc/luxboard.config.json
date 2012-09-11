@@ -8,6 +8,7 @@
         "host":     "http://jira.lan",
         "username": "user",
         "password": "abcdefgh",
+        "project":  "LUX",
         "trunk":  11111,
         "stable": 11110
     }

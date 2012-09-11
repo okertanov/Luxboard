@@ -26,6 +26,7 @@ var os      = require('os'),
     App     = express(),
     Periodic = require('./periodic.js').Periodic,
     ApiController = require('./api-controller.js').ApiController,
+    ApiDb = require('./api-db.js').ApiDb,
     Jiraffe = require('./jiraffe.js').Jiraffe,
     Configuration = require('./configuration.js').Configuration;
 
@@ -35,6 +36,7 @@ var Config      =  new Configuration('~/luxboard.config.json'),
     ServerRoot  =  __dirname,
     ProjectRoot =  path.normalize(ServerRoot + '/../'),
     WWWRoot     =  path.normalize(ProjectRoot + '/wwwroot/'),
+    DbName      = 'Luxboard',
     BtsName     =  'BTS Task',
     BtsTimeout  =  60000, // 1 min
     CisName     =  'CIS Task',
@@ -50,38 +52,110 @@ App.configure(function () {
   App.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
+// Database
+ApiDb.Connect(DbName);
+
 // Router
-ApiController.Initialize().Route(App);
+ApiController.Initialize(ApiDb).Route(App);
 
 // Jiraffe
-var jira = new Jiraffe( Config.jiraffe.host,
+var Jira = new Jiraffe( Config.jiraffe.host,
                         Config.jiraffe.username,
                         Config.jiraffe.password ).Initialize();
 
 // Jira Updater
-function UpdateJiraData(jira, io)
+function UpdateJiraData(jira, socket)
 {
     if ( jira.IsLoggedin() )
     {
+        // Trunk
         jira.GetUnresolvedIssueCountFor(Config.jiraffe.trunk, function(trunk)
         {
             if ( typeof trunk === 'object' && trunk.hasOwnProperty('issuesUnresolvedCount') )
             {
-                io.sockets.emit('luxboard.jiraffe.trunk.unresolved', trunk.issuesUnresolvedCount);
+                socket.emit('luxboard.jiraffe.trunk.unresolved', trunk.issuesUnresolvedCount);
+
+                DbGetLastJiraVersionById(Config.jiraffe.project, Config.jiraffe.trunk, function(projectkey, versionid, version, err)
+                {
+                    if ( version && version.unresolved && version.unresolved !== trunk.issuesUnresolvedCount )
+                    {
+                        DbStoreJiraVersion({
+                            projectkey: Config.jiraffe.project,
+                            versionid:  Config.jiraffe.trunk,
+                            unresolved: trunk.issuesUnresolvedCount
+                        });
+                    }
+                });
             }
         });
 
+        // Stable
         jira.GetUnresolvedIssueCountFor(Config.jiraffe.stable, function(stable)
         {
             if ( typeof stable === 'object' && stable.hasOwnProperty('issuesUnresolvedCount') )
             {
-                io.sockets.emit('luxboard.jiraffe.stable.unresolved', stable.issuesUnresolvedCount);
+                socket.emit('luxboard.jiraffe.stable.unresolved', stable.issuesUnresolvedCount);
+
+                DbGetLastJiraVersionById(Config.jiraffe.project, Config.jiraffe.stable, function(projectkey, versionid, version, err)
+                {
+                    if ( version && version.unresolved && version.unresolved !== stable.issuesUnresolvedCount )
+                    {
+                        DbStoreJiraVersion({
+                            projectkey: Config.jiraffe.project,
+                            versionid:  Config.jiraffe.stable,
+                            unresolved: stable.issuesUnresolvedCount
+                        });
+                    }
+                });
             }
         });
     }
 }
 
-function UpdateJiraPeriodicTask()
+function DbGetLastJiraVersionById(projectkey, versionid, fn)
+{
+    ApiDb.Version.find({projectkey: projectkey, versionid:  versionid}).sort('date', -1).limit(1)
+        .execFind(function(err, versions)
+        {
+            var version = {};
+
+            if ( !err )
+            {
+                if ( versions.length )
+                    version = versions[0];
+            }
+
+            if ( typeof fn === 'function' )
+                fn.call(this, projectkey, versionid, version, err);
+        });
+}
+
+function DbStoreJiraVersion(v, fn)
+{
+    var ver = new ApiDb.Version({   projectkey: v.projectkey,
+                                    versionid:  v.versionid,
+                                    unresolved: v.unresolved,
+                                    total:      v.total,
+                                    fixed:      v.fixed,
+                                    affected:   v.affected  });
+
+    ver.save(function(err)
+    {
+        if ( !err )
+        {
+            console.log('StoreJiraVersion():', 'OK');
+        }
+        else
+        {
+            console.log('StoreJiraVersion():', 'Error:', err);
+        }
+
+        if ( typeof fn === 'function' )
+            fn.call(this, v, err);
+    });
+}
+
+function UpdateJiraPeriodicTask(jira, socket)
 {
     try
     {
@@ -89,17 +163,17 @@ function UpdateJiraPeriodicTask()
         {
             jira.Login(function(data)
             {
-                UpdateJiraData(jira, Io);
+                UpdateJiraData(jira, socket);
             });
         }
         else
         {
-            UpdateJiraData(jira, Io);
+            UpdateJiraData(jira, socket);
         }
     }
     catch(e)
     {
-        console.log('Luxboard Server:', 'Error:', e);
+        console.log('UpdateJiraPeriodicTask():', 'Error:', e);
         jira.Logout();
     }
 }
@@ -108,7 +182,7 @@ function UpdateJiraPeriodicTask()
 var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
     console.log('Inside', this.ctx.name);
 
-    UpdateJiraPeriodicTask();
+    UpdateJiraPeriodicTask(Jira, Io.sockets);
 
 })).Initialize();
 
@@ -127,7 +201,7 @@ Io.on('connection', function(socket)
 {
     console.log('Socket.io connection.');
 
-    UpdateJiraPeriodicTask();
+    UpdateJiraPeriodicTask(Jira, socket);
 
     socket.on('luxboard.service.ping', function(msg)
     {
@@ -174,6 +248,7 @@ function Cleanup()
     ApiController.Terminate();
     BtsTask.Terminate();
     CisTask.Terminate();
+    ApiDb.Disconnect();
 }
 
 // Status/Statistic

@@ -22,9 +22,13 @@ var Schema = mongoose.Schema,
 
 exports.ObjectId = ObjectId;
 
-exports.ProductSchema = new Schema({
-    name:           { type: String,     required: true  },
-    description:    { type: String,     required: false },
+exports.VersionSchema = new Schema({
+    projectkey:     { type: String,     required: true  },
+    versionid:      { type: Number,     required: true  },
+    unresolved:     { type: Number,     required: false },
+    total:          { type: Number,     required: false },
+    fixed:          { type: Number,     required: false },
+    affected:       { type: Number,     required: false },
     date:           { type: Date,       required: true,
                             default: Date.now           }
 });
@@ -38,7 +42,7 @@ exports.BuildSchema = new Schema({
 
 exports.ApiDb =
 {
-    Product: mongoose.model('ProductModel', exports.ProductSchema),
+    Version: mongoose.model('VersionModel', exports.VersionSchema),
     Build: mongoose.model('BuildModel', exports.BuildSchema),
     Connect: function(db)
     {
@@ -48,11 +52,16 @@ exports.ApiDb =
         {
             if ( !db || !db.length )
                 throw 'ApiModels.Connect invalid argument';
-            mongoose.connect('mongodb://localhost/' + db);
+
+            mongoose.connect('mongodb://localhost/' + db, function(err)
+            {
+                if ( err )
+                    throw err;
+            });
         }
         catch(e)
         {
-            console.log(e, e.toString());
+            console.log(e);
             throw e;
         }
     },
@@ -66,7 +75,8 @@ exports.ApiDb =
         }
         catch(e)
         {
-            console.log(e, e.toString());
+            console.log(e);
+            throw e;
         }
     }
 };
