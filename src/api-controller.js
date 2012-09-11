@@ -22,7 +22,7 @@ exports.ApiController =
     ctx:
     {
         db: null
-    }
+    },
     Initialize: function(db)
     {
         console.log('ApiController.Initialize');
@@ -48,12 +48,16 @@ exports.ApiController =
             response = [],
             proj = req.params.proj || req.body.proj;
 
-        this.ctx.db.Version.find({projectkey: proj}).sort('date', -1).limit(limit)
+        this.ctx.db.Version.find({projectkey: proj}).sort({'date': -1}).limit(limit)
             .execFind(function(err, versions)
             {
                 if ( !err )
                 {
                     response = versions;
+                }
+                else
+                {
+                    response = err;
                 }
 
                 that.SendJson(res, response);
@@ -71,12 +75,16 @@ exports.ApiController =
             proj = req.params.proj || req.body.proj,
             ver  = req.params.ver  || req.body.ver;
 
-        this.ctx.db.Version.find({projectkey: proj, versionid:  ver}).sort('date', -1).limit(limit)
+        this.ctx.db.Version.find({projectkey: proj, versionid:  ver}).sort({'date': -1}).limit(limit)
             .execFind(function(err, versions)
             {
                 if ( !err )
                 {
                     response = versions;
+                }
+                else
+                {
+                    response = err;
                 }
 
                 that.SendJson(res, response);

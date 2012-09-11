@@ -77,7 +77,11 @@ function UpdateJiraData(jira, socket)
 
                 DbGetLastJiraVersionById(Config.jiraffe.project, Config.jiraffe.trunk, function(projectkey, versionid, version, err)
                 {
-                    if ( version && version.unresolved && version.unresolved !== trunk.issuesUnresolvedCount )
+                    if ( version && version.unresolved && version.unresolved === trunk.issuesUnresolvedCount )
+                    {
+                        // Handle duplicate
+                    }
+                    else
                     {
                         DbStoreJiraVersion({
                             projectkey: Config.jiraffe.project,
@@ -98,7 +102,11 @@ function UpdateJiraData(jira, socket)
 
                 DbGetLastJiraVersionById(Config.jiraffe.project, Config.jiraffe.stable, function(projectkey, versionid, version, err)
                 {
-                    if ( version && version.unresolved && version.unresolved !== stable.issuesUnresolvedCount )
+                    if ( version && version.unresolved && version.unresolved === stable.issuesUnresolvedCount )
+                    {
+                        // Handle duplicate
+                    }
+                    else
                     {
                         DbStoreJiraVersion({
                             projectkey: Config.jiraffe.project,
@@ -114,7 +122,7 @@ function UpdateJiraData(jira, socket)
 
 function DbGetLastJiraVersionById(projectkey, versionid, fn)
 {
-    ApiDb.Version.find({projectkey: projectkey, versionid:  versionid}).sort('date', -1).limit(1)
+    ApiDb.Version.find({projectkey: projectkey, versionid:  versionid}).sort({'date': -1}).limit(1)
         .execFind(function(err, versions)
         {
             var version = {};
@@ -178,19 +186,6 @@ function UpdateJiraPeriodicTask(jira, socket)
     }
 }
 
-// BTS polling Task
-var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
-    console.log('Inside', this.ctx.name);
-
-    UpdateJiraPeriodicTask(Jira, Io.sockets);
-
-})).Initialize();
-
-// Cis polling Task
-var CisTask = (new Periodic(CisName, CisTimeout, function(){
-    console.log('Inside', this.ctx.name);
-})).Initialize();
-
 // Express Server
 var Server = App.listen(WWWPort);
 
@@ -225,6 +220,19 @@ Io.on('connection', function(socket)
         console.log('Socket.io disconnect.');
     });
 });
+
+// BTS polling Task
+var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
+    console.log('Inside', this.ctx.name);
+
+    UpdateJiraPeriodicTask(Jira, Io.sockets);
+
+})).Initialize();
+
+// Cis polling Task
+var CisTask = (new Periodic(CisName, CisTimeout, function(){
+    console.log('Inside', this.ctx.name);
+})).Initialize();
 
 // Process handlers
 process
