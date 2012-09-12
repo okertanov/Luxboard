@@ -237,11 +237,11 @@ function UpdateTimelineData(socket)
                     function(projectkey, versionid, limit, versions, err)
                     {
                         err = ( err ? err : null ),
-                        memo.projectkey = (memo.projectkey ? memo.projectkey : []);
+                        memo[projectkey] = (memo[projectkey] ? memo[projectkey] : []);
 
                         if ( !err )
                         {
-                            memo.projectkey.push({name: item.name, timeline: versions});
+                            memo[projectkey].push({name: item.name, timeline: versions});
                         }
 
                         callback(err, memo);
