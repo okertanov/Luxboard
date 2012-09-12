@@ -51,7 +51,7 @@ try
             });
 
             // GetUnresolvedIssueCountFor()
-            jira.GetUnresolvedIssueCountFor(config.jiraffe.trunk, function(trunk)
+            jira.GetUnresolvedIssueCountFor(config.jiraffe.versions[0].version, function(trunk)
             {
                 if ( IsObjectEmpty(trunk) )
                     throw new Error('Jiraffe test error: Empty reply for GetUnresolvedIssueCountFor(trunk)');
@@ -60,7 +60,7 @@ try
             });
 
             // GetRelatedIssueCountFor()
-            jira.GetRelatedIssueCountFor(config.jiraffe.trunk, function(trunk)
+            jira.GetRelatedIssueCountFor(config.jiraffe.versions[0].version, function(trunk)
             {
                 if ( IsObjectEmpty(trunk) )
                     throw new Error('Jiraffe test error: Empty reply for GetRelatedIssueCountFor(trunk)');
