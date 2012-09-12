@@ -8,6 +8,7 @@
         "host":     "http://jira.lan",
         "username": "user",
         "password": "abcdefgh",
+        "qlimit":   30,
         "versions":
         [
             {

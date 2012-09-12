@@ -21,7 +21,8 @@ var os      = require('os'),
     path    = require('path'),
     http    = require('http'),
     util    = require("util"),
-    events =  require('events'),
+    async   = require('async'),
+    events  = require('events'),
     express = require('express'),
     App     = express(),
     Periodic = require('./periodic.js').Periodic,
@@ -38,9 +39,11 @@ var Config      =  new Configuration('~/luxboard.config.json'),
     WWWRoot     =  path.normalize(ProjectRoot + '/wwwroot/'),
     DbName      = 'Luxboard',
     BtsName     =  'BTS Task',
-    BtsTimeout  =  60000, // 1 min
+    BtsTimeout  =  60000,  // 1 min
+    TmlName     =  'TML Task',
+    TmlTimeout  =  120000, // 1 min
     CisName     =  'CIS Task',
-    CisTimeout  =  120000; // 2 min
+    CisTimeout  =  180000; // 3 min
 
 // Express application
 App.configure(function ()
@@ -63,6 +66,42 @@ ApiController.Initialize(ApiDb).Route(App);
 var Jira = new Jiraffe( Config.jiraffe.host,
                         Config.jiraffe.username,
                         Config.jiraffe.password ).Initialize();
+
+// Express Server
+var Server = App.listen(WWWPort);
+
+// Socket.io
+var Io = require('socket.io').listen(Server);
+
+Io.on('connection', function(socket)
+{
+    console.log('Socket.io connection.');
+
+    UpdateJiraPeriodicTask(Jira, socket),
+        UpdateTimelinePeriodicTask(socket);
+
+    socket.on('luxboard.service.ping', function(msg)
+    {
+        console.log('Socket.io ping received: ', msg);
+        socket.emit('luxboard.service.ack', msg);
+    });
+
+    socket.on('luxboard.service.message', function(msg)
+    {
+        console.log('Socket.io service message received: ', msg);
+        socket.emit('luxboard.service.ack', msg);
+    });
+
+    socket.on('luxboard.service.ack', function(msg)
+    {
+        console.log('Socket.io ack received: ', msg);
+    });
+
+    socket.on('disconnect', function()
+    {
+        console.log('Socket.io disconnect.');
+    });
+});
 
 // Jira Updater
 function UpdateJiraData(jira, socket)
@@ -100,6 +139,24 @@ function UpdateJiraData(jira, socket)
             });
         }
     }
+}
+
+function DbGetJiraVersionById(projectkey, versionid, limit, fn)
+{
+    ApiDb.Version.find({projectkey: projectkey, versionid:  versionid}).sort({'date': -1}).limit(limit)
+        .execFind(function(err, versions)
+        {
+            var retversions = [];
+
+            if ( !err )
+            {
+                if ( versions.length )
+                    retversions = versions;
+            }
+
+            if ( typeof fn === 'function' )
+                fn.call(this, projectkey, versionid, limit, retversions, err);
+        });
 }
 
 function DbGetLastJiraVersionById(projectkey, versionid, fn)
@@ -168,40 +225,55 @@ function UpdateJiraPeriodicTask(jira, socket)
     }
 }
 
-// Express Server
-var Server = App.listen(WWWPort);
-
-// Socket.io
-var Io = require('socket.io').listen(Server);
-
-Io.on('connection', function(socket)
+function UpdateTimelineData(socket)
 {
-    console.log('Socket.io connection.');
-
-    UpdateJiraPeriodicTask(Jira, socket);
-
-    socket.on('luxboard.service.ping', function(msg)
+    // Trunk && Stable
+    if ( Config.jiraffe.versions.length )
     {
-        console.log('Socket.io ping received: ', msg);
-        socket.emit('luxboard.service.ack', msg);
-    });
+        async.reduce(Config.jiraffe.versions, {},
+            function iterator(memo, item, callback)
+            {
+                DbGetJiraVersionById(item.project, item.version, Config.jiraffe.qlimit,
+                    function(projectkey, versionid, limit, versions, err)
+                    {
+                        err = ( err ? err : null ),
+                        memo.projectkey = (memo.projectkey ? memo.projectkey : []);
 
-    socket.on('luxboard.service.message', function(msg)
-    {
-        console.log('Socket.io service message received: ', msg);
-        socket.emit('luxboard.service.ack', msg);
-    });
+                        if ( !err )
+                        {
+                            memo.projectkey.push({name: item.name, timeline: versions});
+                        }
 
-    socket.on('luxboard.service.ack', function(msg)
-    {
-        console.log('Socket.io ack received: ', msg);
-    });
+                        callback(err, memo);
+                    }
+                );
+            },
+            function callback(err, result)
+            {
+                if ( !err )
+                {
+                    socket.emit('luxboard.jiraffe.timeline', result);
+                }
+                else
+                {
+                    console.log('UpdateTimelineData():', 'Error:', err);
+                }
+            }
+        );
+    }
+}
 
-    socket.on('disconnect', function()
+function UpdateTimelinePeriodicTask(socket)
+{
+    try
     {
-        console.log('Socket.io disconnect.');
-    });
-});
+        UpdateTimelineData(socket);
+    }
+    catch(e)
+    {
+        console.log('UpdateTimelinePeriodicTask():', 'Error:', e);
+    }
+}
 
 // BTS polling Task
 var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
@@ -211,7 +283,15 @@ var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
 
 })).Initialize();
 
-// Cis polling Task
+// TML polling Task
+var TmlTask = (new Periodic(TmlName, TmlTimeout, function(){
+    console.log('Inside', this.ctx.name);
+
+    UpdateTimelinePeriodicTask(Io.sockets);
+
+})).Initialize();
+
+// CIS polling Task
 var CisTask = (new Periodic(CisName, CisTimeout, function(){
     console.log('Inside', this.ctx.name);
 })).Initialize();
@@ -240,8 +320,11 @@ process
 function Cleanup()
 {
     ApiController.Terminate();
-    BtsTask.Terminate();
-    CisTask.Terminate();
+
+    BtsTask.Terminate(),
+        TmlTask.Terminate(),
+            CisTask.Terminate();
+
     ApiDb.Disconnect();
 }
 

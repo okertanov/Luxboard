@@ -133,6 +133,11 @@ exports.Application = function()
                     var num = (isNaN(parseInt(msg)) ? 0 : parseInt(msg));
                     $('#right.issues .counter').text(num);
                 });
+
+                socket.on('luxboard.jiraffe.timeline', function(msg)
+                {
+                    console.log('Socket.io luxboard.jiraffe.timeline received: ', msg);
+                });
             });
             return this;
         }
