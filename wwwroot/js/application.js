@@ -118,7 +118,8 @@ exports.Application = function()
         },
         InitializeIO: function()
         {
-            var socket = this.ctx.socket = io.connect();
+            var that = this,
+                socket = this.ctx.socket = io.connect();
 
             socket.on('connect', function()
             {
@@ -164,7 +165,7 @@ exports.Application = function()
                 socket.on('luxboard.jiraffe.timeline', function(msg)
                 {
                     console.log('Socket.io luxboard.jiraffe.timeline received: ', msg);
-                    this.ctx.plot.setData(msg).draw();
+                    that.ctx.plot.setData(msg).draw();
                 });
             });
 

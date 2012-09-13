@@ -236,7 +236,7 @@ function UpdateTimelineData(socket)
                 DbGetJiraVersionById(item.project, item.version, Config.jiraffe.qlimit,
                     function(projectkey, versionid, limit, versions, err)
                     {
-                        err = ( err ? err : null ),
+                        err = ( err ? err : null );
 
                         if ( !err )
                         {
