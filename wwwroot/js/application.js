@@ -95,9 +95,11 @@ exports.Application = function()
                 lines:  { show: true    },
                 legend: { show: false   },
                 points: { show: true    },
-                yaxis:  { show: true    },
+                yaxis:  { show: true,
+                          autoscaleMargin: 0.02 },
                 xaxis:  { show: true,
-                          mode: "time"  },
+                          mode: "time",
+                          autoscaleMargin: 0.02 },
                 grid:   { show: false   }
             };
 
