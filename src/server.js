@@ -230,18 +230,20 @@ function UpdateTimelineData(socket)
     // Trunk && Stable
     if ( Config.jiraffe.versions.length )
     {
-        async.reduce(Config.jiraffe.versions, {},
+        async.reduce(Config.jiraffe.versions, [],
             function iterator(memo, item, callback)
             {
                 DbGetJiraVersionById(item.project, item.version, Config.jiraffe.qlimit,
                     function(projectkey, versionid, limit, versions, err)
                     {
                         err = ( err ? err : null ),
-                        memo[projectkey] = (memo[projectkey] ? memo[projectkey] : []);
 
                         if ( !err )
                         {
-                            memo[projectkey].push({name: item.name, timeline: versions});
+                            var plots = versions.map(function(v){
+                                return [v.versionid, v.unresolved];
+                            });
+                            memo.push({label: item.name, data: plots});
                         }
 
                         callback(err, memo);

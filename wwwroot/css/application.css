@@ -17,6 +17,11 @@ body
     font: 16px/26px Helvetica, Helvetica Neue, Arial;
 }
 
+div.container-fluid
+{
+    height: 100% !important;
+}
+
 header h3
 {
     color: #A0A0A0;
@@ -29,4 +34,15 @@ article.issues .counter
     color: #A0A0A0;
     font: 16em Helvetica, Helvetica Neue, Arial;
     text-align: left;
+    height: 100% !important;
+    width: 100% !important;
+    min-height: 400px !important;
 }
+
+article.timeline .plot
+{
+    height: 100% !important;
+    width: 100% !important;
+    min-height: 300px !important;
+}
+

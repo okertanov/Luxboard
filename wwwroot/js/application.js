@@ -85,7 +85,34 @@ exports.Application = function()
         },
         InitializeUI: function()
         {
+            // Disable elastic page scrolling
             $(document).bind('touchmove', false);
+
+            // Setup plot
+            var options =
+            {
+                series: { shadowSize: 0 },
+                lines:  { show: true  },
+                legend: { show: false },
+                points: { show: true  },
+                yaxis:  { show: false },
+                xaxis:  { show: false },
+                grid:   { show: false }
+            };
+
+            var plots =
+            [
+                {
+                    "label": "",
+                    "data": []
+                },
+                {
+                    "label": "",
+                    "data": []
+                }
+            ];
+
+            var plot = this.ctx.plot = $.plot($("div.plot"), plots, options);
 
             return this;
         },
@@ -137,8 +164,10 @@ exports.Application = function()
                 socket.on('luxboard.jiraffe.timeline', function(msg)
                 {
                     console.log('Socket.io luxboard.jiraffe.timeline received: ', msg);
+                    this.ctx.plot.setData(msg);
                 });
             });
+
             return this;
         }
     };

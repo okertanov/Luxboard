@@ -18,7 +18,7 @@
 
         <script src="js/jquery-1.8.1.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
-        <script src="js/flot/jquery.flot.js"></script>
+        <script src="js/jquery.flot.js"></script>
         <script src="js/application.js"></script>
         <script src="/socket.io/socket.io.js"></script>
 
@@ -34,7 +34,7 @@
                             <h3>trunk</h3>
                         </header>
                         <section>
-                            <span class="counter"></span>
+                            <div class="counter"></div>
                         </section>
                         <footer>
                         </footer>
@@ -47,7 +47,22 @@
                             <h3>stable</h3>
                         </header>
                         <section>
-                            <span class="counter"></span>
+                            <div class="counter"></div>
+                        </section>
+                        <footer>
+                        </footer>
+                    </article>
+                </div>
+            </div> <!-- .row-fluid -->
+
+            <div class="row-fluid">
+                <div class="span10 offset1">
+                    <article class="timeline" id="entire">
+                        <header>
+                            <h3>timeline</h3>
+                        </header>
+                        <section>
+                            <div class="plot"></div>
                         </section>
                         <footer>
                         </footer>
