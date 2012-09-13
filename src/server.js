@@ -241,7 +241,7 @@ function UpdateTimelineData(socket)
                         if ( !err )
                         {
                             var plots = versions.map(function(v){
-                                return [v.versionid, v.unresolved];
+                                return [v.date, v.unresolved];
                             });
                             memo.push({label: item.name, data: plots});
                         }

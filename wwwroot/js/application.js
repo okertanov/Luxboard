@@ -164,7 +164,7 @@ exports.Application = function()
                 socket.on('luxboard.jiraffe.timeline', function(msg)
                 {
                     console.log('Socket.io luxboard.jiraffe.timeline received: ', msg);
-                    this.ctx.plot.setData(msg);
+                    this.ctx.plot.setData(msg).draw();
                 });
             });
 
