@@ -32,17 +32,15 @@ header h3
 article.issues .counter
 {
     color: #A0A0A0;
-    font: 16em Helvetica, Helvetica Neue, Arial;
+    font: 14em Helvetica, Helvetica Neue, Arial;
     text-align: left;
     height: 100% !important;
-    width: 100% !important;
-    min-height: 400px !important;
+    min-height: 300px !important;
 }
 
 article.timeline .plot
 {
     height: 100% !important;
-    width: 100% !important;
-    min-height: 300px !important;
+    min-height: 200px !important;
 }
 
