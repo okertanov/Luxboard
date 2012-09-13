@@ -8,9 +8,7 @@ body
 {
     width: 100% !important;
     height: 100% !important;
-    background-color: #4F4F3F;
-    background-image: url(../img/textures/low_contrast_linen.png);
-    background-repeat: repeat;
+    background: #4F4F3F url(../img/textures/low_contrast_linen.png);
 
     font-size: 1em;
     line-height: 1.4;
