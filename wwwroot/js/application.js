@@ -168,6 +168,7 @@ exports.Application = function()
                     console.log('Socket.io luxboard.jiraffe.timeline received: ', msg);
 
                     that.ctx.plot.setData(msg);
+                    that.ctx.plot.setupGrid();
                     that.ctx.plot.draw();
                 });
             });
