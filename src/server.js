@@ -240,8 +240,8 @@ function UpdateTimelineData(socket)
 
                         if ( !err )
                         {
-                            var plots = versions.map(function(v){
-                                return [v.date, v.unresolved];
+                            var plots = versions.reverse().map(function(v){
+                                return [v.date.getTime(), v.unresolved];
                             });
                             memo.push({label: item.name, data: plots});
                         }

@@ -92,12 +92,13 @@ exports.Application = function()
             var options =
             {
                 series: { shadowSize: 0 },
-                lines:  { show: true  },
-                legend: { show: false },
-                points: { show: true  },
-                yaxis:  { show: false },
-                xaxis:  { show: false },
-                grid:   { show: false }
+                lines:  { show: true    },
+                legend: { show: false   },
+                points: { show: true    },
+                yaxis:  { show: true    },
+                xaxis:  { show: true,
+                          mode: "time"  },
+                grid:   { show: false   }
             };
 
             var plots =
@@ -165,7 +166,9 @@ exports.Application = function()
                 socket.on('luxboard.jiraffe.timeline', function(msg)
                 {
                     console.log('Socket.io luxboard.jiraffe.timeline received: ', msg);
-                    that.ctx.plot.setData(msg).draw();
+
+                    that.ctx.plot.setData(msg);
+                    that.ctx.plot.draw();
                 });
             });
 
