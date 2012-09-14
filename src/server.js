@@ -298,20 +298,37 @@ function UpdateCruiseControlData(socket)
                     method: 'GET'
                 };
 
+            // TODO: Convert to a module
             request(options, function(error, response, body)
             {
                 if ( !error && response.statusCode === 200 )
                 {
                     var parser = new xml2js.Parser();
-                    parser.parseString(data, function (err, result)
+                    parser.parseString(body, function (err, result)
                     {
-                        if ( !err && Object.keys(result).length )
+                        if ( !err && result && Object.keys(result).length )
                         {
-                            socket.emit('luxboard.service.message', result);
+                            if ( result.Projects && result.Projects.Project && result.Projects.Project.length )
+                            {
+                                var projects = result.Projects.Project || [],
+                                    filtered = projects.filter(function(p){
+                                        return ( p && p.$ && p.$.name === builder.projects[0].name );
+                                    });
+
+                                if ( filtered.length && filtered[0] && filtered[0].$ )
+                                {
+                                    var project = filtered[0].$;
+                                    socket.emit('luxboard.cruize.status', project);
+                                }
+                            }
+                            else
+                            {
+                                console.log('UpdateCruiseControlData():', 'Invalid parsed data');
+                            }
                         }
                         else
                         {
-                            console.log('UpdateCruiseControlData():', 'XML parser  error:', err);
+                            console.log('UpdateCruiseControlData():', 'XML parser error:', err);
                         }
                     });
                 }
@@ -320,7 +337,7 @@ function UpdateCruiseControlData(socket)
                     console.log('UpdateCruiseControlData():', 'Request error:', err);
                 }
             });
-        }
+        });
     }
 }
 
