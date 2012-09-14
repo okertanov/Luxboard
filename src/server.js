@@ -277,6 +277,17 @@ function UpdateTimelinePeriodicTask(socket)
     }
 }
 
+function UpdateCruiseControlPeriodicTask(socket)
+{
+    try
+    {
+    }
+    catch(e)
+    {
+        console.log('UpdateCruiseControlPeriodicTask():', 'Error:', e);
+    }
+}
+
 // BTS polling Task
 var BtsTask = (new Periodic(BtsName, BtsTimeout, function(){
     console.log('Inside', this.ctx.name);
@@ -296,6 +307,9 @@ var TmlTask = (new Periodic(TmlName, TmlTimeout, function(){
 // CIS polling Task
 var CisTask = (new Periodic(CisName, CisTimeout, function(){
     console.log('Inside', this.ctx.name);
+
+    UpdateCruiseControlPeriodicTask(Io.sockets);
+
 })).Initialize();
 
 // Process handlers
@@ -307,6 +321,7 @@ process
     .on('uncaughtException', function(e)
     {
         console.log('uncaughtException:', e);
+        Exit();
     })
     .on('SIGUSR1', function()
     {
@@ -314,13 +329,22 @@ process
     })
     .on('SIGINT', function()
     {
-        Cleanup();
-        process.exit();
+        Exit();
     });
+
+// Clean exit
+function Exit()
+{
+    console.log('Exit():', 'Exiting...');
+
+    process.exit();
+}
 
 // Graceful cleanup
 function Cleanup()
 {
+    console.log('Cleanup():', 'Cleaning state...');
+
     ApiController.Terminate();
 
     BtsTask.Terminate(),
