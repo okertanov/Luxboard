@@ -20,7 +20,7 @@ div.container-fluid
     height: 100% !important;
 }
 
-header h3
+article header h3
 {
     color: #A0A0A0;
     font-size: 1.2em;
@@ -40,5 +40,38 @@ article.timeline .plot
 {
     height: 100% !important;
     min-height: 200px !important;
+}
+
+article header
+{
+    position: relative;
+}
+
+.icon
+{
+    display: inline-block;
+    position: absolute;
+    top: -0.5em;
+    left: 7em;
+    width: 64px;
+    height: 64px;
+}
+
+.icon.red
+{
+    background-image: url('../img/icons/red-16-64x64.png');
+    background-repeat: no-repeat;
+}
+
+.icon.green
+{
+    background-image: url('../img/icons/green-01-64x64.png');
+    background-repeat: no-repeat;
+}
+
+.icon.yellow
+{
+    background-image: url('../img/icons/yellow-09-64x64.png');
+    background-repeat: no-repeat;
 }
 
