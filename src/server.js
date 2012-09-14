@@ -23,6 +23,7 @@ var os      = require('os'),
     util    = require("util"),
     async   = require('async'),
     events  = require('events'),
+    xml2js  = require('xml2js'),
     express = require('express'),
     App     = express(),
     Periodic = require('./periodic.js').Periodic,
@@ -41,9 +42,9 @@ var Config      =  new Configuration('~/luxboard.config.json'),
     BtsName     =  'BTS Task',
     BtsTimeout  =  60000,  // 1 min
     TmlName     =  'TML Task',
-    TmlTimeout  =  120000, // 1 min
+    TmlTimeout  =  120000, // 2 min
     CisName     =  'CIS Task',
-    CisTimeout  =  180000; // 3 min
+    CisTimeout  =  60000;  // 1 min
 
 // Express application
 App.configure(function ()
@@ -78,7 +79,8 @@ Io.on('connection', function(socket)
     console.log('Socket.io connection.');
 
     UpdateJiraPeriodicTask(Jira, socket),
-        UpdateTimelinePeriodicTask(socket);
+        UpdateTimelinePeriodicTask(socket),
+            UpdateCruiseControlPeriodicTask(socket);
 
     socket.on('luxboard.service.ping', function(msg)
     {
@@ -277,10 +279,56 @@ function UpdateTimelinePeriodicTask(socket)
     }
 }
 
+function UpdateCruiseControlData(socket)
+{
+    if ( Config.cruize.builders.length )
+    {
+        Config.cruize.builders.forEach(function(builder, idx, arr)
+        {
+            var uri =
+                [
+                    builder.host,
+                    '/ccnet/',
+                    'XmlStatusReport.aspx'
+                ].join(''),
+                options =
+                {
+                    timeout: 10000,
+                    uri: uri,
+                    method: 'GET'
+                };
+
+            request(options, function(error, response, body)
+            {
+                if ( !error && response.statusCode === 200 )
+                {
+                    var parser = new xml2js.Parser();
+                    parser.parseString(data, function (err, result)
+                    {
+                        if ( !err && Object.keys(result).length )
+                        {
+                            socket.emit('luxboard.service.message', result);
+                        }
+                        else
+                        {
+                            console.log('UpdateCruiseControlData():', 'XML parser  error:', err);
+                        }
+                    });
+                }
+                else
+                {
+                    console.log('UpdateCruiseControlData():', 'Request error:', err);
+                }
+            });
+        }
+    }
+}
+
 function UpdateCruiseControlPeriodicTask(socket)
 {
     try
     {
+        UpdateCruiseControlData(socket);
     }
     catch(e)
     {

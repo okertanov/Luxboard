@@ -22,6 +22,38 @@
                 "version":  11110
             }
         ]
+    },
+    "cruize":
+    {
+        "builders":
+        [
+            {
+                "name":     "autobuilder1",
+                "host":     "http://autobuilder1",
+                "username": "",
+                "password": "",
+                "projects":
+                [
+                    {
+                        "name": "Luxriot_trunk",
+                        "alias": "trunk"
+                    }
+                ]
+            },
+            {
+                "name":     "autobuilder2",
+                "host":     "http://autobuilder2",
+                "username": "",
+                "password": "",
+                "projects":
+                [
+                    {
+                        "name": "Luxriot_v2_1_X",
+                        "alias": "stable"
+                    }
+                ]
+            }
+        ]
     }
 }
 
