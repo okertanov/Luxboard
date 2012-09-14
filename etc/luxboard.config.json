@@ -28,27 +28,27 @@
         "builders":
         [
             {
-                "name":     "autobuilder1",
-                "host":     "http://autobuilder1",
+                "name":     "builder1",
+                "host":     "http://builder1",
                 "username": "",
                 "password": "",
                 "projects":
                 [
                     {
-                        "name": "Luxriot_trunk",
+                        "name": "3_X_Y",
                         "alias": "trunk"
                     }
                 ]
             },
             {
-                "name":     "autobuilder2",
-                "host":     "http://autobuilder2",
+                "name":     "builder2",
+                "host":     "http://builder2",
                 "username": "",
                 "password": "",
                 "projects":
                 [
                     {
-                        "name": "Luxriot_v2_1_X",
+                        "name": "2_X_Y",
                         "alias": "stable"
                     }
                 ]
