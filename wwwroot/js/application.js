@@ -182,12 +182,31 @@ exports.Application = function()
                 {
                     console.log('Socket.io luxboard.cruize.status received:', msg);
 
-                    var project = msg;
-                    /*
-                        project.name
-                        project.activity
-                        project.lastBuildStatus
-                    */
+                    var project = msg,
+                        el = null,
+                        cls = null;
+
+                    if ( /trunk/.test(project.name) )
+                        el = $('#left.issues span.icon');
+                    else
+                        el = $('#right.issues span.icon');
+
+                    if ( /building/i.test(project.activity) )
+                    {
+                        cls = 'yellow';
+                    }
+                    else
+                    {
+                        if ( /success/i.test(project.lastBuildStatus) )
+                            cls = 'green';
+                        else
+                            cls = 'red';
+                    }
+
+                    if ( el && cls )
+                    {
+                        el.removeClass('red green yellow').addClass(cls);
+                    }
                 });
             });
 
