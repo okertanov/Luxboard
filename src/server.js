@@ -335,7 +335,7 @@ function UpdateCruiseControlData(socket)
                 }
                 else
                 {
-                    console.log('UpdateCruiseControlData():', 'Request error:', err);
+                    console.log('UpdateCruiseControlData():', 'Request error:', error);
                 }
             });
         });
