@@ -86,7 +86,7 @@ exports.Application = function()
         InitializeUI: function()
         {
             // Disable elastic page scrolling
-            $(document).bind('touchmove', false);
+            //$(document).bind('touchmove', false);
 
             // Setup plot
             var options =
