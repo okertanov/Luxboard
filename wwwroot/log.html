@@ -57,8 +57,18 @@
 
                     if( msg && /\:data/i.test(msg.ev) && msg.data.length )
                     {
-                        var pre = $('.log-content pre');
-                        pre.text( pre.text() + msg.data );
+                        var pre = $('.log-content pre'),
+                            pretext = pre.text(),
+                            prelength = pretext.length;
+
+                        if ( prelength > 32768 )
+                        {
+                            pre.text( msg.data );
+                        }
+                        else
+                        {
+                            pre.text( pretext + msg.data );
+                        }
                         $('html, body').animate({scrollTop:$(document).height()}, 'fast');
                     }
                     console.log('luxboard.log.event received:', msg);
