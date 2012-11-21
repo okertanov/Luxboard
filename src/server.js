@@ -61,9 +61,6 @@ App.configure(function ()
 // Database
 ApiDb.Connect(DbName);
 
-// Router
-ApiController.Initialize(ApiDb).Route(App);
-
 // Jiraffe
 var Jira = new Jiraffe( Config.jiraffe.host,
                         Config.jiraffe.username,
@@ -74,6 +71,9 @@ var Server = App.listen(WWWPort);
 
 // Socket.io
 var Io = require('socket.io').listen(Server);
+
+// Router
+ApiController.Initialize(ApiDb, Io.sockets).Route(App);
 
 Io.on('connection', function(socket)
 {

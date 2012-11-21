@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+        <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <title>Luxboard Log viewer</title>
+
+        <link rel="shortcut icon" href="favicon.ico">
+        <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="css/application.css">
+
+        <script src="js/jquery-1.8.1.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+
+        <script>
+        "use strict";
+        $(function(){
+            // Ajax
+            $.ajax({
+                url: '/api/log/:srv:www:luxboard.lan:log:messages',
+                dataType: 'json',
+                success: function(data, stat){
+                    console.log('Success:', stat, data);
+                    $('.log-header').text(data.log);
+                    $('.log-status').text(data.state);
+
+                    // UI
+                    $('.log-content pre').show();
+
+                },
+                error: function(xhr, stat, error){
+                    console.log('Error:', stat, error);
+                }
+            });
+
+            // IO
+            var that = this,
+                connectedstr = ' - [Connected]',
+                socket = io.connect();
+            
+            socket.on('connect', function()
+            {
+                console.log('Socket.io connection.');
+                $(document).attr("title", $(document).attr("title") + connectedstr);
+
+                socket.on('luxboard.log.event', function(msg)
+                {
+                    //{ev: ev + ':data', name: filename, data: data}
+
+                    if( msg && /\:data/i.test(msg.ev) && msg.data.length )
+                    {
+                        var pre = $('.log-content pre');
+                        pre.text( pre.text() + msg.data );
+                        $('html, body').animate({scrollTop:$(document).height()}, 'fast');
+                    }
+                    console.log('luxboard.log.event received:', msg);
+                });
+
+                socket.on('disconnect', function()
+                {
+                    console.log('Socket.io disconnect.');
+                    var title = $(document).attr("title"),
+                        newtitle = title.replace(connectedstr, '');
+                    $(document).attr("title", newtitle);
+                });
+            });
+
+        });
+        </script>
+
+    </head>
+    <body>
+	<noscript>
+	    <h3>Your browser does not support JavaScript</h3>
+	    <h3>JavaScript must be enabled in order to use application.</h3>
+	</noscript>
+
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span10 offset1">
+                    <article class="log-view" id="left">
+                        <header>
+                            <h3 class="log-header"></h3>
+                            <h3 class="log-status"></h3>
+                        </header>
+                        <section>
+                            <div class="log-content">
+                                <pre style="display: none;"></pre>
+                            </div>
+                        </section>
+                        <footer>
+                        </footer>
+                    </article>
+                </div>
+            </div> <!-- .row-fluid -->
+        </div> <!-- .container-fluid -->
+    </body>
+</html>

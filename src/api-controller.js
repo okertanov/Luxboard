@@ -15,19 +15,25 @@
 // Strict mode by default
 "use strict";
 
-var underscore = require('underscore')._;
+var os      = require('os'),
+    fs      = require('fs'),
+    path    = require('path'),
+    underscore = require('underscore')._;
 
 exports.ApiController =
 {
     ctx:
     {
-        db: null
+        db: null,
+        socket: null,
+        watchers: [],
     },
-    Initialize: function(db)
+    Initialize: function(db, socket)
     {
         console.log('ApiController.Initialize');
 
         this.ctx.db = db;
+        this.ctx.socket = socket;
 
         return this;
     },
@@ -115,6 +121,95 @@ exports.ApiController =
 
         return this;
     },
+    SystemLogGet: function(req, res, next)
+    {
+        console.log('ApiController.SystemLogGet');
+
+        var that = this,
+            param = req.params.name || req.body.name || null,
+            name = param ? param.replace(/\:/gi, '/') : null,
+            exists = fs.existsSync(name),
+            stat = exists? fs.statSync(name) : null,
+            state = null,
+            fpos = 0;
+
+        // Is fs object valid and no watcher for that file
+        if ( exists && stat && stat.isFile() ) 
+        {
+            if ( typeof this.ctx.watchers[name] === 'undefined' )
+            {
+                // Reset file position
+                fpos = stat.size;
+                this.ctx.watchers[name] = fs.watch(name, { persistent: true }, function(ev, filename){
+                    if ( /change/i.test(ev) )
+                    {
+                        // Update stat
+                        stat = fs.statSync(name);
+
+                        if ( stat.size < fpos )
+                        {
+                            fpos = stat.size;
+                            // Notify the clients
+                            that.ctx.socket.emit('luxboard.log.event', {ev: ev + ':reset', name: filename, data: fpos});
+                            return false;
+                        }
+
+                        // Read remaining file contents
+                        var stream = fs.createReadStream(name, { flags: 'r', encoding: 'utf-8', start: fpos, end: stat.size }); 
+                        if ( stream )
+                        {
+                            // Set end position
+                            fpos = stat.size;
+
+                            // Stream events (read and notifi the clients)
+                            stream
+                                .on('open', function(){
+                                    that.ctx.socket.emit('luxboard.log.event', {ev: ev + ':open', name: filename, data: ''});
+                                })
+                                .on('close', function(){
+                                    that.ctx.socket.emit('luxboard.log.event', {ev: ev + ':close', name: filename, data: ''});
+                                })
+                                .on('error', function(e){
+                                    that.ctx.socket.emit('luxboard.log.event', {ev: ev + ':error', name: filename, data: e});
+                                })
+                                .on('data', function(data){
+                                that.ctx.socket.emit('luxboard.log.event', {ev: ev + ':data', name: filename, data: data});
+                                });
+
+                            return true;
+                        }
+                    }
+                });
+
+                if ( this.ctx.watchers[name] )
+                {
+                    state = 'success: watch started';
+                }
+                else
+                {
+                    state = 'error: bad notification';
+                }
+
+                // TODO: this.ctx.watchers[name].close() somewhere outside
+            }
+            else
+            {
+                state = 'success: watch continued';
+            }
+        }
+        else
+        {
+            state = 'error: bad access';
+        }
+
+        var response = { time: (new Date()).getTime(),
+                         log: name,
+                         state: state };
+
+        this.SendJson(res, response);
+
+        return this;
+    },
     AdminPost: function(req, res, next)
     {
         console.log('ApiController.BuildGet');
@@ -158,6 +253,7 @@ exports.ApiController =
         app.get(  '/api/versions/:proj/:ver',   function(req, res, next){ that.VersionGet.call(that, req, res, next); } );
         app.get(  '/api/builds',                function(req, res, next){ that.BuildsGet.call(that, req, res, next); } );
         app.get(  '/api/builds/:build',         function(req, res, next){ that.BuildGet.call(that, req, res, next); } );
+        app.get(  '/api/log/:name',             function(req, res, next){ that.SystemLogGet.call(that, req, res, next); } );
         app.post( '/api/admin',                 function(req, res, next){ that.AdminPost.call(that, req, res, next); } );
         app.all(  '/*',                         function(req, res, next){ that.Default.call(that, req, res, next); } );
 
