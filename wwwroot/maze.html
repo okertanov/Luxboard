@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <style>
+            html, body, #con
+            {
+                width: 100%;
+                height:100%;
+                font-family: "courier new", monospace;
+                font-size: 1.2em;
+                line-height: 0.99;
+                overflow: hidden;
+                white-space: pre-wrap;
+                white-space: pre-line;
+                word-wrap: break-word;
+            }
+        </style>
+        <script>
+            "use strict";
+
+            function ready(body)
+            {
+                var pre = document.getElementById('con');
+
+                (function OneMazeItem()
+                {
+                    setTimeout(function()
+                        {
+                            var el = document.createElement("span");
+                            el.innerHTML = Math.round(Math.random()) ? '&#9585;' : '&#9586;';
+                            pre.appendChild(el);
+                            OneMazeItem();
+                        }, 0);
+                })();
+            }
+        </script>
+    </head>
+    <body onload="ready(this)">
+        <p>10 PRINT CHR$(205.5+RND(1)); : GOTO 10</p>
+        <div id="con"></div>
+    </body>
+</html>
